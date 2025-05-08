@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>KAIST MFE, 2025 Spring - 빅데이터와 금융자료분석 프로젝트 (Team 4)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./알고리즘1.html" rel="next">
+<link href="./빅데이터_과제.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./빅데이터1.html">머신러닝2(’25 봄)</a></li><li class="breadcrumb-item"><a href="./빅데이터_팀프로젝트_팀4_보고서.html">빅데이터와 금융자료분석 프로젝트 (Team 4)</a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">KAIST MFE, 2025 Spring</a> 
+        <div class="sidebar-tools-main">
+    <a href="./KAIST-MFE,-2025-Spring.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome!</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">머신러닝2(’25 봄)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./빅데이터1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">빅데이터와 금융자료 분석 CH1</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./빅데이터_과제.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">빅데이터와 금융자료 분석 기말대체과제</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./빅데이터_팀프로젝트_팀4_보고서.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">빅데이터와 금융자료분석 프로젝트 (Team 4)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">알고리즘 거래전략(’25 봄)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./알고리즘1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">알고리즘 거래전략과 고빈도 금융</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">사례로 보는 금융공학(’25 봄)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./사례1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">사례로 보는 금융공학 실무</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./사례_과제.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">코스피200 변동성 조정 위클리 양매도 전략</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">장외파생상품 기초 실무(’25 봄)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./장외파생1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">장외파생상품 기초 실무</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text">금융윤리와 사회책임(’25 봄)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./금융윤리1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">금융윤리와 사회책임</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#프로젝트-개요" id="toc-프로젝트-개요" class="nav-link active" data-scroll-target="#프로젝트-개요">1. 프로젝트 개요</a></li>
+  <li><a href="#데이터의-구조-특성-eda" id="toc-데이터의-구조-특성-eda" class="nav-link" data-scroll-target="#데이터의-구조-특성-eda">2. 데이터의 구조, 특성 (EDA)</a>
+  <ul class="collapse">
+  <li><a href="#데이터의-수집-기본구조" id="toc-데이터의-수집-기본구조" class="nav-link" data-scroll-target="#데이터의-수집-기본구조">데이터의 수집, 기본구조</a></li>
+  <li><a href="#데이터의-특성" id="toc-데이터의-특성" class="nav-link" data-scroll-target="#데이터의-특성">데이터의 특성</a></li>
+  </ul></li>
+  <li><a href="#데이터의-전처리" id="toc-데이터의-전처리" class="nav-link" data-scroll-target="#데이터의-전처리">3. 데이터의 전처리</a></li>
+  <li><a href="#대출-연체여부-예측-모델-구축-및-평가" id="toc-대출-연체여부-예측-모델-구축-및-평가" class="nav-link" data-scroll-target="#대출-연체여부-예측-모델-구축-및-평가">4. 대출 연체여부 예측 모델 구축 및 평가</a>
+  <ul class="collapse">
+  <li><a href="#adasyn을-이용한-오버샘플링" id="toc-adasyn을-이용한-오버샘플링" class="nav-link" data-scroll-target="#adasyn을-이용한-오버샘플링">ADASYN을 이용한 오버샘플링</a></li>
+  <li><a href="#xgboost-모델-구축" id="toc-xgboost-모델-구축" class="nav-link" data-scroll-target="#xgboost-모델-구축">XGBoost 모델 구축</a></li>
+  <li><a href="#모델-일반화성능-평가" id="toc-모델-일반화성능-평가" class="nav-link" data-scroll-target="#모델-일반화성능-평가">모델 일반화성능 평가</a></li>
+  <li><a href="#변수-중요도feature-importance-분석" id="toc-변수-중요도feature-importance-분석" class="nav-link" data-scroll-target="#변수-중요도feature-importance-분석">변수 중요도(Feature Importance) 분석</a></li>
+  <li><a href="#시사점" id="toc-시사점" class="nav-link" data-scroll-target="#시사점">시사점</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./빅데이터1.html">머신러닝2(’25 봄)</a></li><li class="breadcrumb-item"><a href="./빅데이터_팀프로젝트_팀4_보고서.html">빅데이터와 금융자료분석 프로젝트 (Team 4)</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">빅데이터와 금융자료분석 프로젝트 (Team 4)</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><strong>XGboost 알고리즘을 활용한 은행 대출의 부도 여부 예측 모델 구축</strong></p>
+<p>강상묵(20259013) 김형환(20249132) 유석호(20249264) 이현준(20249349) 최영서(20249430) 최재필(20249433)</p>
+<section id="프로젝트-개요" class="level2">
+<h2 class="anchored" data-anchor-id="프로젝트-개요">1. 프로젝트 개요</h2>
+<p>본 프로젝트는 <strong>여러 데이터 전처리 기법(결측치, 이상치, 특성공학 등)과 머신러닝 알고리즘(이상치 분류, 차원축소, XGBoost 등)을 실제 금융데이터에 적용</strong>해보고 시사점을 도출하기 위해 작성되었습니다.</p>
+<p>이를 위해 미국 Lending Club의 P2P 대출 데이터를 사용하였으며, 전반적인 워크플로우는 아래와 같습니다.</p>
+<ol type="1">
+<li>데이터의 구조, 특성 파악 (EDA)</li>
+<li>데이터의 전처리 (특성에 따른 칼럼 가공, 문자형 변수 처리, 결측치 및 이상치 처리, 변수 선택)</li>
+<li>XGBoost 알고리즘을 이용한 대출 연체여부 예측 모델 구축 및 평가
+<ul>
+<li>샘플링, 모델 튜닝, 성과 평가, 변수 중요도 분석(SHAP), Cat/LightGBM 등 다른 모델과 비교</li>
+</ul></li>
+</ol>
+</section>
+<section id="데이터의-구조-특성-eda" class="level2">
+<h2 class="anchored" data-anchor-id="데이터의-구조-특성-eda">2. 데이터의 구조, 특성 (EDA)</h2>
+<section id="데이터의-수집-기본구조" class="level3">
+<h3 class="anchored" data-anchor-id="데이터의-수집-기본구조">데이터의 수집, 기본구조</h3>
+<p>미국 소재의 P2P 대출 전문은행인 Lending Club의 ’07~’20년 대출 데이터를 사용하였습니다. (출처 : Kaggle)</p>
+<p>약 40만개의 데이터로, 목적변수인 대출상태를 포함해 전체 27개의 칼럼(수치형 12 + 문자형 15)으로 이루어져있으며, 목적변수는 정상(상환, Fully paid) 및 부도(연체, Charged off)로 이진분류 문제입니다.</p>
+<div>
+
+</div>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="image/ml1_datainfo.png" class="quarto-figure quarto-figure-center figure-img" style="width:9cm;height:5.5cm"></p>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="image/ml2_classimbal.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="데이터의-특성" class="level3">
+<h3 class="anchored" data-anchor-id="데이터의-특성">데이터의 특성</h3>
+<p>데이터의 각 칼럼별 특징을 알아보고, 적절한 전처리 방법을 탐색해보았습니다.</p>
+<p>먼저 <strong>수치형 변수</strong>입니다. 결측치 및 이상치 처리는 별도 진행 예정으로 따로 다루지 않겠습니다.</p>
+<p><strong>상관관계 행렬을 Heatmap</strong>으로 살펴보았습니다. 대체적으로 변수들 간 <strong>상관관계가 미미</strong>하였으며, <strong>일부 상관계수가 높은 변수</strong>들은 변수선택 과정에서 제외하는 등 <strong>별도의 전처리 과정을 통해 다중공선성 문제를 해결</strong>할 계획입니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="image/ml3_heatmap.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>다음으로 <strong>문자형 변수</strong>입니다. 목적변수와 관련이 있는 것으로 보이는 주요 예시만 살펴보겠습니다.</p>
+<p>먼저, <strong>대출기간(term), 집보유형태(home_ownership), 대출목적(purpose)이 영향</strong>을 미치는 것으로 추정됩니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="image/ml5_4plot.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>다음으로, <strong>신용등급(A1~G5)에 따라 부도율이 높아지는 추이</strong>를 보였으며, 문자형 변수들 중 <strong>일부는 고유값이 너무 많아 분석에서 제외</strong>하는 것이 효과적일 것으로 보입니다.</p>
+<div>
+
+</div>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="image/ml4_grade.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="image/ml6_category.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="데이터의-전처리" class="level2">
+<h2 class="anchored" data-anchor-id="데이터의-전처리">3. 데이터의 전처리</h2>
+<p>데이터의 전처리는 아래의 과정으로 실시하였습니다.</p>
+<ol type="1">
+<li>분석에 적합하도록 칼럼 변환 및 통합, 제거
+<ul>
+<li>변환/통합 : 주소(address)는 우편번호(zip_code)만 추출하고 제거, 대출기간(term, 36month 등)은 수치형으로 변환, 집 소유여부(home_ownership)의 극소수값들은 Other로 통합</li>
+<li>불필요한 noise 방지를 위해 100개 이상의 고유값을 가진 칼럼 제거 : 직업(title), 직업글자수(emp_title), 발행일(issue_d), 최초연도(earliest_cr_line)</li>
+<li>다른 변수와 중복되거나 추론 가능한 칼럼 제거 : 신용점수-대분류(grade), 근속연수(emp_length)</li>
+</ul></li>
+<li>문자형 변수 처리 : 순서가 있거나 이진변수인 경우 라벨인코딩, 단순 점주인 경우 원핫인코딩 적용
+<ul>
+<li>라벨인코딩 : 목적변수(이진), 신용점수(순서 존재) / 원핫인코딩 : 이외의 문자형 변수</li>
+</ul></li>
+<li>수치형 변수의 결측치 및 이상치 처리 : 중간값 처리 및 1% 이상치 제거
+<ul>
+<li>결측치 : 변수간 상관관계가 미미하고, 이후 Boruta를 적용 예정이므로 예측형 모델보다는 중간값을 채택</li>
+<li>이상치 : 고차원, 많은 샘플(약 40만)을 고려, 분포에 대한 가정이 불필요한 Isolation forest 기법 채택</li>
+</ul></li>
+<li>변수 선택을 통해 분석에 적합한 최종 데이터 가공 : Boruta 알고리즘 적용
+<ul>
+<li>일부 변수간 상관관계가 존재하는 점을 고려, 최적의 변수 조합을 찾고자 Boruta 알고리즘 채택</li>
+<li>원핫인코딩 대상 변수를 제외한 13개(수치형+라벨)에 알고리즘을 적용한 결과 11개의 변수를 선택하였고, 원핫인코딩 대상 변수와 결합하여 최종 데이터 구성</li>
+</ul></li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled" title="Isolation Forest 검증(T-SNE 적용) 및 최종 데이터 구성">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Isolation Forest 검증(T-SNE 적용) 및 최종 데이터 구성
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>수치형 변수에 <strong>T-SNE를 적용하여 3차원으로 축소</strong>한 결과, <strong>이상치 제거(Isolation Forest)가 적절히 작동</strong>하였으며, <strong>Boruta 알고리즘으로 변수 선택</strong>까지 마친 후 <strong>최종 데이터</strong>는 <strong>7개의 문자형 변수</strong>(원핫인코딩 6 + 라벨인코딩 1) 및 <strong>9개의 수치형 변수</strong>, <strong>1개의 목적변수(이진분류)</strong>로 구성되어 있습니다.</p>
+<div>
+
+</div>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="image/ml7-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="image/ml8_finaldata.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:55.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="대출-연체여부-예측-모델-구축-및-평가" class="level2">
+<h2 class="anchored" data-anchor-id="대출-연체여부-예측-모델-구축-및-평가">4. 대출 연체여부 예측 모델 구축 및 평가</h2>
+<section id="adasyn을-이용한-오버샘플링" class="level3">
+<h3 class="anchored" data-anchor-id="adasyn을-이용한-오버샘플링">ADASYN을 이용한 오버샘플링</h3>
+<p>모델링에 앞서, 클래스 불균형 문제는 <strong>ADASYN을 통한 오버샘플링</strong>으로 해결하였습니다. 과대평가, 과적합을 방지하고 <strong>검증 무결성을 위해 CV 과정의 훈련 데이터에만 오버샘플링</strong>하였으며, (<code>imblearn.pipeline</code> 활용) 이를 통해 <strong>검증은 항상 원본데이터로만 진행</strong>됩니다.</p>
+</section>
+<section id="xgboost-모델-구축" class="level3">
+<h3 class="anchored" data-anchor-id="xgboost-모델-구축">XGBoost 모델 구축</h3>
+<p>앞서 구성한 40개 변수로 <strong>“대출 연체 여부”를 예측하는 모델을 XGBoost 알고리즘</strong>을 통해 구축하였으며, <strong>모델 튜닝은 2단계 최적화 접근법을 적용</strong>하였습니다. 이러한 방식은 <strong>과적합을 방지하고 정해진 계산자원 하에서 최대한 공정하게 파라미터를 비교</strong>할 수 있는 장점이 있습니다.</p>
+<p><strong>1단계: 초기 하이퍼파라미터 탐색</strong> - 상대적으로 높은 학습률(0.1)과 고정된 n_estimators 값으로 하이퍼파라미터 조합을 탐색 - 각 조합이 동일한 학습 기회(같은 트리 개수)를 갖도록 보장 (CV 내에서 ADASYN 오버샘플링 적용)</p>
+<p><strong>2단계: 최적 모델 미세 조정</strong> - 1단계에서 찾은 최적 하이퍼파라미터에 낮은 학습률(0.01)과 높은 n_estimators(10000) 적용 - 조기종료를 적용(50)하여 최적의 트리 개수 결정하고, 전체 훈련/검증 데이터를 사용하여 모델 학습</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="plots/learning_curve.png" class="img-fluid figure-img" style="width:70.0%"></p>
+<figcaption>2단계 접근법의 최종 모델 학습곡선</figcaption>
+</figure>
+</div>
+</section>
+<section id="모델-일반화성능-평가" class="level3">
+<h3 class="anchored" data-anchor-id="모델-일반화성능-평가">모델 일반화성능 평가</h3>
+<p>클래스 불균형 문제를 고려하여 최종 모델의 <strong>일반화 성능을 F1-Score를 중심</strong>으로 평가하도록 하겠습니다. <strong>F1-score는 약 0.94, ROC-AUC는 약 0.91로 실제 연체 여부를 잘 예측</strong>하는 것으로 나타났습니다.</p>
+<p>특히, 모델 튜닝 과정에서 1단계 하이퍼파라미터 탐색시 최고 F1-Score가 0.93544였는데, 일반화 성능은 그와 동일한 수준이므로 <strong>과적합 방지를 위한 2단계 최적화 기법이 효과적</strong>인 것을 알 수 있습니다.</p>
+<p><img src="image/ml11_best.png" class="img-fluid" style="width:60.0%"></p>
+<div class="callout callout-style-default callout-note callout-titled" title="여러 Gradiant boosting 계열의 알고리즘과 비교">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+여러 Gradiant boosting 계열의 알고리즘과 비교
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>주로 사용한 XGBoost 이외에도 다양한 Gradiant boosting 계열 및 앙상블 알고리즘이 존재합니다.</p>
+<ul>
+<li><strong>XGBoost</strong>: Regularization과 트리 구조 최적화에 강점을 가진 Gradient Boosting 모델 |</li>
+<li><strong>CatBoost</strong>: 범주형 변수 자동 인식 기능이 있는 Gradient Boosting 기반 모델</li>
+<li><strong>LightGBM</strong>: 빠른 학습 속도와 낮은 메모리 사용의 Gradient Boosting 기반 모델</li>
+<li><strong>Soft Voting</strong>: CatBoost, LightGBM의 예측 확률 평균을 통한 결합(앙상블) 모델</li>
+<li><strong>Stacking</strong>: CatBoost, LightGBM의 예측 결과를 Logistic Regression에 전달하는 메타 모델 기반 앙상블</li>
+</ul>
+<p>XGBoost와 유사한 방식으로 각 모델을 튜닝, 훈련하였으며 <strong>일반화성능은 유사한 수준</strong>이였습니다. F1-Score는 앙상블(Soft Voting) 모델이, ROC-AUC 점수는 XGBoost가 가장 우수하였습니다.</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>모델</th>
+<th>F1 Score</th>
+<th>ROC AUC</th>
+<th>모델</th>
+<th>F1 Score</th>
+<th>ROC AUC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>CatBoost</strong></td>
+<td>0.9355</td>
+<td>0.9073</td>
+<td><strong>Soft Voting</strong></td>
+<td>0.9356</td>
+<td>0.9072</td>
+</tr>
+<tr class="even">
+<td><strong>LightGBM</strong></td>
+<td>0.9353</td>
+<td>0.9066</td>
+<td><strong>Stacking</strong></td>
+<td>0.9330</td>
+<td>0.9072</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>그러나, <strong>샘플이 적은 “부도”인 경우, 예측 성능이 다소 떨어지는 모습</strong>이 관측되었습니다.</p>
+<p><strong>부도의 절반 이상이 정상으로 분류</strong>되었으며 모든 모델에 동일한 문제가 있는 것으로 볼 때, <strong>데이터의 한계</strong>인 것으로 보입니다. 또는 <strong>신경망 계열을 적용해보는 것도 개선방법</strong>이 될 수 있습니다.</p>
+<div>
+
+</div>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="plots/confusion_matrix.png" class="img-fluid figure-img" style="width:80.0%"></p>
+<figcaption>XGBoost Confusion Matrix</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="plots/precision_recall_curve.png" class="img-fluid figure-img" style="width:80.0%"></p>
+<figcaption>XGBoost PRCurve</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="변수-중요도feature-importance-분석" class="level3">
+<h3 class="anchored" data-anchor-id="변수-중요도feature-importance-분석">변수 중요도(Feature Importance) 분석</h3>
+<p><strong>기본 변수 중요도</strong> 산출 결과 부도 여부에는 예상 외로 <strong>주거지가 큰 영향</strong>을 미치는 것을 확인할 수 있었으며, 이외에도 <strong>대출기간 등이 분류에 영향</strong>을 미치는 것을 알 수 있었습니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="plots/feature_importance.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:65.0%"></p>
+</figure>
+</div>
+<p>보다 <strong>상세한 변수 중요도 분석을 위해 SHAP(SHapley Additive exPlanations) 분석</strong>을 실시하여 <strong>각 변수의 중요도, 예측에 미치는 영향(방향성, 정도)을 분석</strong>하였습니다.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="plots/shap_summary_plot.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:65.0%"></p>
+</figure>
+</div>
+<p>전체적인 중요도는 <strong>주거지가 큰 영향을 미친다는 점에서 유사</strong>하였으며, 변수별 특징은 아래와 같습니다.</p>
+<pre><code>-   상위 7개는 해당 지역에 주거(1) 시, 연체(0)가 많으므로 집값/소득수준이 낮은 주거지로 추정
+-   하위 2개는 집값/소득수준이 높은 주거지로 추정
+-   대출목적이 부채상환/신용카드, 대출이자가 높고, 대출기간이 길고, 소득이 낮을수록 연체 예측 가능성 증가
+-   이 외에도 대부분의 변수가 대출과 관련된 일반적인 직관과 동일한 것을 알 수 있었음</code></pre>
+</section>
+<section id="시사점" class="level3">
+<h3 class="anchored" data-anchor-id="시사점">시사점</h3>
+<p><strong>이번 프로젝트를 통해 실제 은행의 데이터를 살펴보고, 대출의 부도 확률 예측 모델을 구축</strong>해보았습니다.</p>
+<p>먼저 <strong>실제 데이터를 전처리</strong>하는 과정에서 발생하는 결측치, 이상치, 적합하지 않은 변수 분류 등의 <strong>문제점을 실제로 경험</strong>할 수 있었고 Isolation Forest 및 T-SNE, Boruta 알고리즘을 적용해보면서 <strong>각 알고리즘이 어떻게 작동하는지, 어떤 방식으로 문제를 해결하고 활용</strong>되는지 알 수 있었습니다.</p>
+<p>또한, <strong>XGBoost 알고리즘</strong>이 <strong>금융데이터 예측에 강력한 성능</strong>을 가진 것을 확인하였고, 모델 성능에는 알고리즘 선택 뿐만아니라 <strong>하이퍼파라미터 튜닝 방법(2단계 최적화) 클래스 불균형 해소(oversampling), 변수 선별(boruta) 등이 매우 중요</strong>하다는 것을 느꼈습니다.</p>
+<p>결과적으로 은행 대출의 <strong>연체여부에는 주거지가 매우 큰 영향</strong>을 미친것으로 나타났으며, 이는 <strong>주거지에 집값/주거형태/소득/신용점수/직업 등 종합적인 요소가 모두 반영</strong>되어있기 때문인 것으로 추정됩니다. 이외에도 <strong>이자율, 대출목적/기간 등이 연체 여부 예측에 영향</strong>을 미치는 것으로 나타났으며, <strong>그 영향은 일반적인 직관과 동일</strong>하였습니다.</p>
+<p>데이터 자체의 한계점으로 인해 소수 표본에 대한 학습이 부족하여 예측력이 다소 떨어지는 한계점이 있었으나, <strong>전반적으로 수업시간에 다룬 여러 알고리즘을 통해 이론이 실제 세상에 적용되는 과정을 이해</strong>할 수 있었습니다. 또한, <strong>분석에 적합한 데이터를 구하고 전처리하는 것이 매우 중요</strong>하다는 것을 알게 된 프로젝트였습니다.</p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./빅데이터_과제.html" class="pagination-link" aria-label="빅데이터와 금융자료 분석 기말대체과제">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">빅데이터와 금융자료 분석 기말대체과제</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./알고리즘1.html" class="pagination-link" aria-label="알고리즘 거래전략과 고빈도 금융">
+        <span class="nav-page-text">알고리즘 거래전략과 고빈도 금융</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># 빅데이터와 금융자료분석 프로젝트 (Team 4) {.unnumbered}</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>**XGboost 알고리즘을 활용한 은행 대출의 부도 여부 예측 모델 구축**</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>강상묵(20259013) 김형환(20249132) 유석호(20249264) 이현준(20249349) 최영서(20249430) 최재필(20249433)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">## 1. 프로젝트 개요</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>본 프로젝트는 **여러 데이터 전처리 기법(결측치, 이상치, 특성공학 등)과 머신러닝 알고리즘(이상치 분류, 차원축소, XGBoost 등)을 실제 금융데이터에 적용**해보고 시사점을 도출하기 위해 작성되었습니다.</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>이를 위해 미국 Lending Club의 P2P 대출 데이터를 사용하였으며, 전반적인 워크플로우는 아래와 같습니다.</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>데이터의 구조, 특성 파악 (EDA)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>데이터의 전처리 (특성에 따른 칼럼 가공, 문자형 변수 처리, 결측치 및 이상치 처리, 변수 선택)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>XGBoost 알고리즘을 이용한 대출 연체여부 예측 모델 구축 및 평가</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>샘플링, 모델 튜닝, 성과 평가, 변수 중요도 분석(SHAP), Cat/LightGBM 등 다른 모델과 비교</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="fu">## 2. 데이터의 구조, 특성 (EDA)</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">### 데이터의 수집, 기본구조</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>미국 소재의 P2P 대출 전문은행인 Lending Club의 '07\~'20년 대출 데이터를 사용하였습니다. (출처 : Kaggle)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>약 40만개의 데이터로, 목적변수인 대출상태를 포함해 전체 27개의 칼럼(수치형 12 + 문자형 15)으로 이루어져있으며, 목적변수는 정상(상환, Fully paid) 및 부도(연체, Charged off)로 이진분류 문제입니다.</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>::: {layout-ncol="2"}</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/ml1_datainfo.png)</span>{width="9cm" height="5.5cm" fig-align="center"}</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/ml2_classimbal.png)</span>{width=80% fig-align="center"}</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="fu">### 데이터의 특성</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>데이터의 각 칼럼별 특징을 알아보고, 적절한 전처리 방법을 탐색해보았습니다.</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>먼저 **수치형 변수**입니다. 결측치 및 이상치 처리는 별도 진행 예정으로 따로 다루지 않겠습니다.</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>**상관관계 행렬을 Heatmap**으로 살펴보았습니다. 대체적으로 변수들 간 **상관관계가 미미**하였으며, **일부 상관계수가 높은 변수**들은 변수선택 과정에서 제외하는 등 **별도의 전처리 과정을 통해 다중공선성 문제를 해결**할 계획입니다.</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/ml3_heatmap.png)</span>{fig-align="center"}</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>\newpage</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>다음으로 **문자형 변수**입니다. 목적변수와 관련이 있는 것으로 보이는 주요 예시만 살펴보겠습니다.</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>먼저, **대출기간(term), 집보유형태(home_ownership), 대출목적(purpose)이 영향**을 미치는 것으로 추정됩니다.</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/ml5_4plot.png)</span>{fig-align="center"}</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>다음으로, **신용등급(A1\~G5)에 따라 부도율이 높아지는 추이**를 보였으며, 문자형 변수들 중 **일부는 고유값이 너무 많아 분석에서 제외**하는 것이 효과적일 것으로 보입니다.</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>::: {layout-ncol="2"}</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/ml4_grade.png)</span>{fig-align="center"}</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/ml6_category.png)</span>{width="50%" fig-align="center"}</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>\newpage</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="fu">## 3. 데이터의 전처리</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>데이터의 전처리는 아래의 과정으로 실시하였습니다.</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>분석에 적합하도록 칼럼 변환 및 통합, 제거</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>변환/통합 : 주소(address)는 우편번호(zip_code)만 추출하고 제거, 대출기간(term, 36month 등)은 수치형으로 변환, 집 소유여부(home_ownership)의 극소수값들은 Other로 통합</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>불필요한 noise 방지를 위해 100개 이상의 고유값을 가진 칼럼 제거 : 직업(title), 직업글자수(emp_title), 발행일(issue_d), 최초연도(earliest_cr_line)</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>다른 변수와 중복되거나 추론 가능한 칼럼 제거 : 신용점수-대분류(grade), 근속연수(emp_length)</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>문자형 변수 처리 : 순서가 있거나 이진변수인 경우 라벨인코딩, 단순 점주인 경우 원핫인코딩 적용</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>라벨인코딩 : 목적변수(이진), 신용점수(순서 존재) / 원핫인코딩 : 이외의 문자형 변수</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>수치형 변수의 결측치 및 이상치 처리 : 중간값 처리 및 1% 이상치 제거</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>결측치 : 변수간 상관관계가 미미하고, 이후 Boruta를 적용 예정이므로 예측형 모델보다는 중간값을 채택</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>이상치 : 고차원, 많은 샘플(약 40만)을 고려, 분포에 대한 가정이 불필요한 Isolation forest 기법 채택</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="ss">4.  </span>변수 선택을 통해 분석에 적합한 최종 데이터 가공 : Boruta 알고리즘 적용</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>일부 변수간 상관관계가 존재하는 점을 고려, 최적의 변수 조합을 찾고자 Boruta 알고리즘 채택</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>원핫인코딩 대상 변수를 제외한 13개(수치형+라벨)에 알고리즘을 적용한 결과 11개의 변수를 선택하였고, 원핫인코딩 대상 변수와 결합하여 최종 데이터 구성</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Isolation Forest 검증(T-SNE 적용) 및 최종 데이터 구성"}</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>수치형 변수에 **T-SNE를 적용하여 3차원으로 축소**한 결과, **이상치 제거(Isolation Forest)가 적절히 작동**하였으며, **Boruta 알고리즘으로 변수 선택**까지 마친 후 **최종 데이터**는 **7개의 문자형 변수**(원핫인코딩 6 + 라벨인코딩 1) 및 **9개의 수치형 변수**, **1개의 목적변수(이진분류)**로 구성되어 있습니다.</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>::: {layout-ncol="2"}</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/ml7-1.png)</span>{width="80%" fig-align="center"}</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/ml8_finaldata.png)</span>{width="55%" fig-align="center"}</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>\newpage</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4. 대출 연체여부 예측 모델 구축 및 평가</span></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="fu">### ADASYN을 이용한 오버샘플링</span></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>모델링에 앞서, 클래스 불균형 문제는 **ADASYN을 통한 오버샘플링**으로 해결하였습니다. 과대평가, 과적합을 방지하고 **검증 무결성을 위해 CV 과정의 훈련 데이터에만 오버샘플링**하였으며, (`imblearn.pipeline` 활용) 이를 통해 **검증은 항상 원본데이터로만 진행**됩니다.</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a><span class="fu">### XGBoost 모델 구축</span></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>앞서 구성한 40개 변수로 **"대출 연체 여부"를 예측하는 모델을 XGBoost 알고리즘**을 통해 구축하였으며, **모델 튜닝은 2단계 최적화 접근법을 적용**하였습니다. 이러한 방식은 **과적합을 방지하고 정해진 계산자원 하에서 최대한 공정하게 파라미터를 비교**할 수 있는 장점이 있습니다.</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>**1단계: 초기 하이퍼파라미터 탐색**</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>상대적으로 높은 학습률(0.1)과 고정된 n_estimators 값으로 하이퍼파라미터 조합을 탐색</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>각 조합이 동일한 학습 기회(같은 트리 개수)를 갖도록 보장 (CV 내에서 ADASYN 오버샘플링 적용)</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>**2단계: 최적 모델 미세 조정**</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>1단계에서 찾은 최적 하이퍼파라미터에 낮은 학습률(0.01)과 높은 n_estimators(10000) 적용</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>조기종료를 적용(50)하여 최적의 트리 개수 결정하고, 전체 훈련/검증 데이터를 사용하여 모델 학습</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="al">![2단계 접근법의 최종 모델 학습곡선](plots/learning_curve.png)</span>{width="70%" fig-align="center"}</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a><span class="fu">### 모델 일반화성능 평가</span></span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>클래스 불균형 문제를 고려하여 최종 모델의 **일반화 성능을 F1-Score를 중심**으로 평가하도록 하겠습니다. **F1-score는 약 0.94, ROC-AUC는 약 0.91로 실제 연체 여부를 잘 예측**하는 것으로 나타났습니다.</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>특히, 모델 튜닝 과정에서 1단계 하이퍼파라미터 탐색시 최고 F1-Score가 0.93544였는데, 일반화 성능은 그와 동일한 수준이므로 **과적합 방지를 위한 2단계 최적화 기법이 효과적**인 것을 알 수 있습니다.</span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/ml11_best.png)</span>{width="60%"}</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="여러 Gradiant boosting 계열의 알고리즘과 비교"}</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>주로 사용한 XGBoost 이외에도 다양한 Gradiant boosting 계열 및 앙상블 알고리즘이 존재합니다.</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**XGBoost**: Regularization과 트리 구조 최적화에 강점을 가진 Gradient Boosting 모델 |</span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**CatBoost**: 범주형 변수 자동 인식 기능이 있는 Gradient Boosting 기반 모델</span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**LightGBM**: 빠른 학습 속도와 낮은 메모리 사용의 Gradient Boosting 기반 모델</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Soft Voting**: CatBoost, LightGBM의 예측 확률 평균을 통한 결합(앙상블) 모델</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Stacking**: CatBoost, LightGBM의 예측 결과를 Logistic Regression에 전달하는 메타 모델 기반 앙상블</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>XGBoost와 유사한 방식으로 각 모델을 튜닝, 훈련하였으며 **일반화성능은 유사한 수준**이였습니다. F1-Score는 앙상블(Soft Voting) 모델이, ROC-AUC 점수는 XGBoost가 가장 우수하였습니다.</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>| 모델 | F1 Score | ROC AUC | 모델 | F1 Score | ROC AUC | </span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>|------|----------|---------|------|----------|---------|</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>| **CatBoost**  | 0.9355 | 0.9073 | **Soft Voting** | 0.9356 | 0.9072 | </span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>| **LightGBM** | 0.9353 | 0.9066 | **Stacking**  | 0.9330 | 0.9072 |</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>그러나, **샘플이 적은 "부도"인 경우, 예측 성능이 다소 떨어지는 모습**이 관측되었습니다.</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>**부도의 절반 이상이 정상으로 분류**되었으며 모든 모델에 동일한 문제가 있는 것으로 볼 때, **데이터의 한계**인 것으로 보입니다. 또는 **신경망 계열을 적용해보는 것도 개선방법**이 될 수 있습니다.</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>::: {layout-ncol="2"}</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a><span class="al">![XGBoost Confusion Matrix](plots/confusion_matrix.png)</span>{width="80%" fig-align="center"}</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a><span class="al">![XGBoost PRCurve](plots/precision_recall_curve.png)</span>{width="80%" fig-align="center"}</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>\newpage</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="fu">### 변수 중요도(Feature Importance) 분석</span></span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>**기본 변수 중요도** 산출 결과 부도 여부에는 예상 외로 **주거지가 큰 영향**을 미치는 것을 확인할 수 있었으며, 이외에도 **대출기간 등이 분류에 영향**을 미치는 것을 알 수 있었습니다.</span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a><span class="al">![](plots/feature_importance.png)</span>{width="65%" fig-align="center"}</span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>보다 **상세한 변수 중요도 분석을 위해 SHAP(SHapley Additive exPlanations) 분석**을 실시하여 **각 변수의 중요도, 예측에 미치는 영향(방향성, 정도)을 분석**하였습니다.</span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a><span class="al">![](plots/shap_summary_plot.png)</span>{width="65%" fig-align="center"}</span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>\newpage</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>전체적인 중요도는 **주거지가 큰 영향을 미친다는 점에서 유사**하였으며, 변수별 특징은 아래와 같습니다.</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="in">    -   상위 7개는 해당 지역에 주거(1) 시, 연체(0)가 많으므로 집값/소득수준이 낮은 주거지로 추정</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="in">    -   하위 2개는 집값/소득수준이 높은 주거지로 추정</span></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="in">    -   대출목적이 부채상환/신용카드, 대출이자가 높고, 대출기간이 길고, 소득이 낮을수록 연체 예측 가능성 증가</span></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a><span class="in">    -   이 외에도 대부분의 변수가 대출과 관련된 일반적인 직관과 동일한 것을 알 수 있었음</span></span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a><span class="fu">### 시사점</span></span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a>**이번 프로젝트를 통해 실제 은행의 데이터를 살펴보고, 대출의 부도 확률 예측 모델을 구축**해보았습니다.</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a>먼저 **실제 데이터를 전처리**하는 과정에서 발생하는 결측치, 이상치, 적합하지 않은 변수 분류 등의 **문제점을 실제로 경험**할 수 있었고 Isolation Forest 및 T-SNE, Boruta 알고리즘을 적용해보면서 **각 알고리즘이 어떻게 작동하는지, 어떤 방식으로 문제를 해결하고 활용**되는지 알 수 있었습니다.</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>또한, **XGBoost 알고리즘**이 **금융데이터 예측에 강력한 성능**을 가진 것을 확인하였고, 모델 성능에는 알고리즘 선택 뿐만아니라 **하이퍼파라미터 튜닝 방법(2단계 최적화) 클래스 불균형 해소(oversampling), 변수 선별(boruta) 등이 매우 중요**하다는 것을 느꼈습니다.</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>결과적으로 은행 대출의 **연체여부에는 주거지가 매우 큰 영향**을 미친것으로 나타났으며, 이는 **주거지에 집값/주거형태/소득/신용점수/직업 등 종합적인 요소가 모두 반영**되어있기 때문인 것으로 추정됩니다. 이외에도 **이자율, 대출목적/기간 등이 연체 여부 예측에 영향**을 미치는 것으로 나타났으며, **그 영향은 일반적인 직관과 동일**하였습니다.</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>데이터 자체의 한계점으로 인해 소수 표본에 대한 학습이 부족하여 예측력이 다소 떨어지는 한계점이 있었으나, **전반적으로 수업시간에 다룬 여러 알고리즘을 통해 이론이 실제 세상에 적용되는 과정을 이해**할 수 있었습니다. 또한, **분석에 적합한 데이터를 구하고 전처리하는 것이 매우 중요**하다는 것을 알게 된 프로젝트였습니다.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

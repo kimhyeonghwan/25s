@@ -1,0 +1,70 @@
+project:
+  type: book
+
+execute:
+  freeze: auto
+
+jupyter: 
+  kernelspec: 
+    name: hwan
+    display_name: hwan
+    language: python
+
+book:
+  title: "KAIST MFE, 2025 Spring"
+  author: "Kim Hyeonghwan"
+  date: "2025. 3. 5."
+  cover-image: cover.png
+  chapters:
+    - index.qmd
+
+    - part : 머신러닝2('25 봄)
+      chapters: 
+        - 빅데이터1.ipynb
+        - 빅데이터_과제.ipynb
+        - 빅데이터_팀프로젝트_팀4_보고서.qmd
+
+    - part : 알고리즘 거래전략('25 봄)
+      chapters: 
+        - 알고리즘1.qmd
+
+    - part : 사례로 보는 금융공학('25 봄)
+      chapters: 
+        - 사례1.qmd
+        - 사례_과제.qmd
+
+    - part : 장외파생상품 기초 실무('25 봄)
+      chapters: 
+       - 장외파생1.qmd
+
+    - part : 금융윤리와 사회책임('25 봄)
+      chapters: 
+        - 금융윤리1.qmd
+
+  downloads: pdf
+
+code-block-bg: true
+code-block-border-left: "#31BAE9"
+
+format:
+  html:
+    theme: cosmo
+    linestretch : 2
+    code-tools: true
+    code-overflow: wrap
+    monofont: 'Source Code Pro'
+  pdf:
+    documentclass: scrreprt
+    include-in-header: header.tex
+    papersize: A4
+    margin-bottom: 20mm
+    margin-top: 15mm
+    margin-left: 15mm
+    margin-right: 15mm
+    monofontoptions: 
+      - Scale=0.8
+
+
+
+
+

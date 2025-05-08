@@ -1,0 +1,9 @@
+\usepackage[hangul]{kotex}
+\usepackage{iftex}
+\ifPDFTeX
+ \usepackage{dhucs-nanumfont}
+\else\ifXeTeX
+ \setmainhangulfont{NanumMyeongjo}
+\else\ifLuaTeX
+ \setmainhangulfont{NanumMyeongjo}
+\fi\fi\fi

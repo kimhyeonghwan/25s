@@ -1,0 +1,1502 @@
+# 코스피200 변동성 조정 위클리 양매도 전략 {.unnumbered}
+
+25년도 봄학기 금융공학 특수논제 <사례로 보는 금융공학 실무> A조
+
+**김경재(20259048) / 강상묵(20259013) / 김형환(20249132) / 어환석(20259248) / 유수형(20259273)**
+
+```{r}
+#| echo: false
+#| eval: true
+#| warning: false
+#| error: false
+#| output: false
+
+rm(list=ls())
+library(tidyverse)
+library(knitr)
+library(patchwork)
+
+# 1. 원본데이터 준비
+options_raw <- read_csv("data/options_data.csv") %>% tibble()
+idx_raw <- read_csv("data/idx_data.csv") %>% tibble()
+mmf_raw <- read_csv("data/mmf.csv") %>% tibble()
+
+# 2-1. 데이터 전처리 : KRX openAPI 옵션데이터 전처리
+options <- options_raw %>% 
+  # K200, WK200 이외의 옵션 제외
+  filter(substr(PROD_NM,1,3)=="코스피") %>%
+  # 종가가 없는 경우 익일 기준가격(이론가격) 사용
+  mutate(PRICE = as.double(if_else(TDD_CLSPRC=="-",NXTDD_BAS_PRC,TDD_CLSPRC))) %>% 
+  drop_na(PRICE) %>% 
+  select(BAS_DD,ISU_NM,PRICE,ACC_TRDVOL) %>% 
+  separate(ISU_NM, into=c("PROD","RGHT","EXP","EXER_PRC"), sep=' ') %>%
+  mutate(EXER_PRC=as.double(EXER_PRC),
+         EXPMM=if_else(PROD=="코스피200",substr(EXP,3,6),substr(EXP,1,4)),
+         EXPWW=if_else(PROD=="코스피200",2,as.integer(substr(EXP,6,6)))) %>% 
+  filter(EXER_PRC>min(idx_raw$KOSPI200)*0.85,
+         EXER_PRC<max(idx_raw$KOSPI200)*1.15,
+         PROD!="코스피위클리M") %>% # 월요일 만기 위클리옵션 제외
+  mutate(PRIOR=as.integer(EXPMM)*10+EXPWW) # 만기가 짧은 순으로 우선순위 부여
+
+# 2-2. 데이터 전처리 : 옵션 만기일 데이터 생성
+target_date <- options %>% 
+  distinct(.,BAS_DD, PRIOR) %>% 
+  arrange(PRIOR, desc(BAS_DD)) %>% 
+  group_by(PRIOR) %>% 
+  slice(1) %>% 
+  ungroup() %>% 
+  distinct(BAS_DD) %>% 
+  arrange(desc(BAS_DD)) %>% 
+  filter(BAS_DD<20241231, BAS_DD>20200101)
+
+# 2-3. 데이터 전처리 : KRX 정보데이터시스템 K200 및 V-K200지수 전처리
+idx_data <- idx_raw %>%
+  arrange(BAS_DD) %>% 
+  mutate(LAG_K200=lag(KOSPI200),
+         LAG_VK200=lag(VKOSPI200))
+
+K200_portfolio=idx_data %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  mutate(RATE=(KOSPI200-LAG_K200)/LAG_K200,
+         YEAR = substr(BAS_DD, 1, 4),
+         YM = ym(substr(BAS_DD, 1, 6))) %>%
+  group_by(YEAR, YM) %>%
+  summarise(RATE_K200 = if_else(is.na(prod(1 + RATE)),0,prod(1 + RATE)),
+            MMF = mean(MMF)/100,
+            .groups = "drop") %>%
+  ungroup()
+
+# 3-1. 포트폴리오 구성 : VW양매도 포트폴리오 기초정보 생성
+target_info <- target_date %>% 
+  left_join(options, by="BAS_DD") %>% 
+  distinct(BAS_DD,PRIOR) %>% 
+  arrange(desc(BAS_DD),PRIOR) %>% 
+  group_by(BAS_DD) %>% 
+  # 만기가 도래하는 옵션을 제외하고 우선순위가 높은 옵션 선택
+  slice(2) %>% 
+  ungroup() %>% 
+  arrange(desc(BAS_DD)) %>% 
+  left_join(idx_data, by="BAS_DD") %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  # 옵션 보유기간 및 단기금리(MMF) 계산
+  mutate(DIFF_DAY=as.integer(ymd(lag(BAS_DD))-ymd(BAS_DD)),
+         MMF=MMF*0.01) %>% 
+  # 옵션 보유기간에 해당하는 시장기대변동성 계산(V-K200활용)
+  mutate(VOL=LAG_VK200*sqrt(DIFF_DAY)/sqrt(365)/100) %>%
+  # 변동성에 따른 옵션 행사가격 상단(2.5단위 올림) 및 하단(2.5단위 내림) 계산
+  mutate(TARGET_C_K=ceiling(KOSPI200*(1+VOL)*0.4)/0.4,
+         TARGET_P_K=floor(KOSPI200*(1-VOL)*0.4)/0.4) %>% 
+  drop_na(DIFF_DAY) %>% 
+  select(BAS_DD,VOL,DIFF_DAY,MMF,KOSPI200,LAG_VK200,PRIOR,TARGET_C_K,TARGET_P_K)
+
+# 3-2. 포트폴리오 구성 : VW양매도 포트폴리오 거래대상 옵션 정보 생성
+target_options <- target_info %>% 
+  select(BAS_DD, PRIOR, TARGET_C_K, TARGET_P_K) %>% 
+  pivot_longer(cols=c("TARGET_C_K","TARGET_P_K"),names_to = "GRP", values_to = "EXER_PRC") %>% 
+  mutate(RGHT=substr(GRP,8,8)) %>% 
+  left_join(options,by=c("BAS_DD","PRIOR","RGHT","EXER_PRC")) %>%
+  select(BAS_DD,GRP,PRICE,ACC_TRDVOL) %>% 
+  pivot_wider(names_from = "GRP", values_from = c("PRICE","ACC_TRDVOL"))
+
+# 원금 100억원 가정
+cash = 10000*10000*100
+
+# 4. 포트폴리오 구현 : VW양매도 전략을 구현하여 일자별 손익 계산
+portfolio <- target_info %>% 
+  left_join(target_options,by="BAS_DD") %>% 
+  arrange(BAS_DD) %>% 
+  # 원금에 따른 옵션 매도수량 계산
+  mutate(SELL_AMT=cash/250000/KOSPI200) %>% 
+  # 옵션 프리미엄(매도수익)) 계산
+  mutate(PREMIUM=SELL_AMT*(PRICE_TARGET_C_K+PRICE_TARGET_P_K)*250000) %>% 
+  # 원금 및 프리미엄의 MMF 이자수익 및 권리행사손실 계산
+  mutate(INTEREST=(cash+replace_na(PREMIUM,0))*MMF*DIFF_DAY/365,
+         EXERCISE=(if_else(lead(KOSPI200)-TARGET_C_K>0,lead(KOSPI200)-TARGET_C_K,0)+
+                     if_else(TARGET_P_K-lead(KOSPI200)>0,TARGET_P_K-lead(KOSPI200),0))*250000*SELL_AMT) %>% 
+  # 주단위 포트폴리오 손익 계산(원금 100억 가정, 당일 투자시 다음주 실현손익을 의미)
+  mutate(REVENUE=PREMIUM+INTEREST-EXERCISE) %>% 
+  # 거래대상 옵션이 상장되어있지 않은 경우, MMF수익만 고려
+  mutate(REVENUE=if_else(is.na(REVENUE),INTEREST,REVENUE)) %>% 
+  mutate(RATE=REVENUE/cash)  # 주단위 포트폴리오 수익률
+
+# 5. 비교군 포트폴리오 생성 : 월별 5% OTM 양매도 전략
+options2 <- options %>% 
+  filter(PROD=="코스피200")
+
+# 옵션 만기일(매달) 생성
+target_date2 <- options2 %>% 
+  distinct(.,BAS_DD, PRIOR) %>% 
+  arrange(PRIOR, desc(BAS_DD)) %>% 
+  group_by(PRIOR) %>% 
+  slice(1) %>% 
+  ungroup() %>% 
+  distinct(BAS_DD) %>% 
+  arrange(desc(BAS_DD)) %>% 
+  filter(BAS_DD<20241231, BAS_DD>20200101)
+
+# 일반 양매도 포트폴리오 기본 정보 생성
+target_info2 <- target_date2 %>% 
+  left_join(options2, by="BAS_DD") %>% 
+  distinct(BAS_DD,PRIOR) %>% 
+  arrange(desc(BAS_DD),PRIOR) %>% 
+  group_by(BAS_DD) %>% 
+  # 만기가 도래하는 옵션을 제외하고 우선순위가 높은 옵션 선택
+  slice(2) %>% 
+  ungroup() %>% 
+  arrange(desc(BAS_DD)) %>% 
+  left_join(idx_data, by="BAS_DD") %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  # 옵션 보유기간 및 단기금리(MMF) 계산
+  mutate(DIFF_DAY=as.integer(ymd(lag(BAS_DD))-ymd(BAS_DD)),
+         MMF=MMF*0.01,
+         VOL=0.05) %>%
+  # 변동성에 따른 옵션 행사가격 상단(2.5단위 올림) 및 하단(2.5단위 내림) 계산
+  mutate(TARGET_C_K=ceiling(KOSPI200*(1+VOL)*0.4)/0.4,
+         TARGET_P_K=floor(KOSPI200*(1-VOL)*0.4)/0.4) %>% 
+  mutate(DIFF_DAY=if_else(is.na(DIFF_DAY),28,DIFF_DAY)) %>% 
+  select(BAS_DD,VOL,DIFF_DAY,MMF,KOSPI200,LAG_VK200,PRIOR,TARGET_C_K,TARGET_P_K)
+
+# 일반 양매도 포트폴리오 거래대상 옵션
+target_options2 <- target_info2 %>% 
+  select(BAS_DD, PRIOR, TARGET_C_K, TARGET_P_K) %>% 
+  pivot_longer(cols=c("TARGET_C_K","TARGET_P_K"),names_to = "GRP", values_to = "EXER_PRC") %>% 
+  mutate(RGHT=substr(GRP,8,8)) %>% 
+  left_join(options2,by=c("BAS_DD","PRIOR","RGHT","EXER_PRC")) %>%
+  select(BAS_DD,GRP,PRICE,ACC_TRDVOL) %>% 
+  pivot_wider(names_from = "GRP", values_from = c("PRICE","ACC_TRDVOL"))
+
+# 일반 양매도 포트폴리오 구현
+portfolio2 <- target_info2 %>% 
+  left_join(target_options2,by="BAS_DD") %>% 
+  arrange(BAS_DD) %>% 
+  # 원금에 따른 옵션 매도수량 계산
+  mutate(SELL_AMT=cash/250000/KOSPI200) %>% 
+  # 옵션 프리미엄(매도수익)) 계산
+  mutate(PREMIUM=SELL_AMT*(PRICE_TARGET_C_K+PRICE_TARGET_P_K)*250000) %>% 
+  # 원금 및 프리미엄의 MMF 이자수익 및 권리행사손실 계산
+  mutate(INTEREST=(cash+replace_na(PREMIUM,0))*MMF*DIFF_DAY/365,
+         EXERCISE=(if_else(lead(KOSPI200)-TARGET_C_K>0,lead(KOSPI200)-TARGET_C_K,0)+
+                     if_else(TARGET_P_K-lead(KOSPI200)>0,TARGET_P_K-lead(KOSPI200),0))*250000*SELL_AMT) %>% 
+  mutate(EXERCISE=if_else(is.na(EXERCISE),0,EXERCISE)) %>% 
+  # 주단위 포트폴리오 손익 계산(원금 100억 가정, 당일 투자시 다음주 실현손익을 의미)
+  mutate(REVENUE=PREMIUM+INTEREST-EXERCISE) %>% 
+  # 거래대상 옵션이 상장되어있지 않은 경우, MMF수익만 고려
+  mutate(REVENUE=if_else(is.na(REVENUE),INTEREST,REVENUE)) %>% 
+  mutate(RATE=REVENUE/cash) # 주단위 포트폴리오 수익률
+
+# 6. 성과분석 : VW양매도 포트폴리오
+performance <- portfolio %>%
+  drop_na(PREMIUM, EXERCISE) %>%
+  mutate(YEAR = substr(BAS_DD, 1, 4),
+         YM = ym(substr(BAS_DD, 1, 6))) %>%
+  group_by(YEAR, YM) %>%
+  summarise(PREMIUM = sum(PREMIUM),
+            INTEREST = sum(INTEREST),
+            EXERCISE = sum(EXERCISE),
+            REVENUE = sum(REVENUE),
+            RATE = prod(1 + RATE),
+            .groups = "drop") %>%
+  ungroup()
+
+# 6. 성과분석 : 일반 양매도 포트폴리오
+performance2 <- portfolio2 %>%
+  drop_na(PREMIUM, EXERCISE) %>%
+  mutate(YEAR = substr(BAS_DD, 1, 4),
+         YM = ym(substr(BAS_DD, 1, 6))) %>%
+  group_by(YEAR, YM) %>%
+  summarise(PREMIUM = sum(PREMIUM),
+            INTEREST = sum(INTEREST),
+            EXERCISE = sum(EXERCISE),
+            REVENUE = sum(REVENUE),
+            RATE = prod(1 + RATE),
+            .groups = "drop") %>%
+  ungroup()
+
+# 시각화 등
+graph1_1 <- performance %>%
+  arrange(YM) %>%
+  left_join(K200_portfolio,by=c("YEAR","YM")) %>% 
+  mutate(CUM_RATE = cumprod(RATE) * 100 - 100,
+         CUM_RATE_K200 = cumprod(RATE_K200) * 100 - 100) %>% 
+  bind_rows(tibble(YM=ym(201912),CUM_RATE=0,CUM_RATE_K200=0))
+  
+
+graph1_2 <- performance2 %>%
+  arrange(YM) %>%
+  left_join(K200_portfolio,by=c("YEAR","YM")) %>% 
+  mutate(CUM_RATE = cumprod(RATE) * 100 - 100,
+         CUM_RATE_K200 = cumprod(RATE_K200) * 100 - 100) %>% 
+  bind_rows(tibble(YM=ym(201912),CUM_RATE=0,CUM_RATE_K200=0))
+
+graph1_3 <- graph1_1 %>%
+  inner_join(graph1_2, by = "YM", suffix = c("_1", "_2")) %>%
+  mutate(REVENUE_DIFF = (REVENUE_1 - REVENUE_2) / 1e8)
+
+graph2_1 <- performance %>%
+  arrange(YM) %>%
+  left_join(K200_portfolio,by=c("YEAR","YM")) %>% 
+  filter(as.integer(YEAR) > 2021) %>%
+  mutate(CUM_RATE = cumprod(RATE) * 100 - 100,
+         CUM_RATE_K200 = cumprod(RATE_K200) * 100 - 100) %>% 
+  bind_rows(tibble(YM=ym(202112),CUM_RATE=0,CUM_RATE_K200=0))
+
+graph2_2 <- performance2 %>%
+  arrange(YM) %>%
+  left_join(K200_portfolio,by=c("YEAR","YM")) %>% 
+  filter(as.integer(YEAR) > 2021) %>%
+  mutate(CUM_RATE = cumprod(RATE) * 100 - 100,
+         CUM_RATE_K200 = cumprod(RATE_K200) * 100 - 100) %>% 
+  bind_rows(tibble(YM=ym(202112),CUM_RATE=0,CUM_RATE_K200=0))
+
+graph2_3 <- graph2_1 %>%
+  inner_join(graph2_2, by = "YM", suffix = c("_1", "_2")) %>%
+  mutate(REVENUE_DIFF = (REVENUE_1 - REVENUE_2) / 1e8)
+
+graph3_1 <- portfolio %>%
+  mutate(YM = ym(substr(BAS_DD, 1, 6))) %>%
+  group_by(YM) %>%
+  summarise(TargetVol=mean(VOL),
+            Kospi200=mean(KOSPI200)) %>% ungroup()
+
+graph1=ggplot() +
+  geom_line(data = graph1_1, aes(x = YM, y = CUM_RATE, color = "Vol-adj. Weekly"), size = 1) +
+  geom_point(data = graph1_1, aes(x = YM, y = CUM_RATE, color = "Vol-adj. Weekly"), shape = 16, size = 2) +
+  geom_line(data = graph1_2, aes(x = YM, y = CUM_RATE, color = "5% OTM Monthly"), size = 1) +
+  geom_point(data = graph1_2, aes(x = YM, y = CUM_RATE, color = "5% OTM Monthly"), shape = 16, size = 2) +
+  geom_line(data = graph1_1, aes(x = YM, y = CUM_RATE_K200, color = "Kospi 200"), size = 1, alpha=0.7) +
+  geom_point(data = graph1_1, aes(x = YM, y = CUM_RATE_K200, color = "Kospi 200"), shape = 16, size = 2,alpha=0.7) +
+  geom_bar(data = graph1_3, aes(x = YM, y = REVENUE_DIFF * 3),
+           stat = "identity", alpha = 0.5, fill = "gray") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  scale_y_continuous(limits = c(-30, 50), breaks = seq(-30, 50, 10), labels = scales::number_format(accuracy = 0.1),
+                     sec.axis = sec_axis(~ . / 3, name = "Overperform (100M)", breaks = c(-10, -5, 0, 5, 10), labels = c("-10", "-5", "0", "5", "10"))) +
+  scale_color_manual(values = c("Vol-adj. Weekly" = "red", "5% OTM Monthly" = "blue", "Kospi 200" = "Green")) +
+  labs(x = NULL, y = "Cumulative Return (%)", color = "") +
+  theme_minimal() +
+  theme(legend.position = c(0.4, 0.93), legend.direction = "horizontal")
+
+graph2=ggplot() +
+  geom_line(data = graph2_1, aes(x = YM, y = CUM_RATE, color = "Vol-adj. Weekly"), size = 1) +
+  geom_point(data = graph2_1, aes(x = YM, y = CUM_RATE, color = "Vol-adj. Weekly"), shape = 16, size = 2) +
+  geom_line(data = graph2_2, aes(x = YM, y = CUM_RATE, color = "5% OTM Monthly"), size = 1) +
+  geom_point(data = graph2_2, aes(x = YM, y = CUM_RATE, color = "5% OTM Monthly"), shape = 16, size = 2) +
+  geom_line(data = graph2_1, aes(x = YM, y = CUM_RATE_K200, color = "Kospi 200"), size = 1, alpha=0.7) +
+  geom_point(data = graph2_1, aes(x = YM, y = CUM_RATE_K200, color = "Kospi 200"), shape = 16, size = 2,alpha=0.7) +
+  geom_bar(data = graph2_3, aes(x = YM, y = REVENUE_DIFF * 3),
+           stat = "identity", alpha = 0.5, fill = "gray") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  scale_y_continuous(limits = c(-30, 20), breaks = seq(-30, 30, 10), labels = scales::number_format(accuracy = 0.1),
+                     sec.axis = sec_axis(~ . / 3, name = "Overperform (100M)", breaks = c(-10, -5, 0, 5, 10), labels = c("-10", "-5", "0", "5", "10"))) +
+  scale_color_manual(values = c("Vol-adj. Weekly" = "red", "5% OTM Monthly" = "blue", "Kospi 200" = "Green")) +
+  labs(x = NULL, y = "Cumulative Return (%)", color = "") +
+  theme_minimal() +
+  theme(legend.position = c(0.4, 0.93), legend.direction = "horizontal")
+
+graph3=ggplot() +
+  geom_line(data = graph3_1, aes(x = YM, y = Kospi200, color = "Kospi 200"), size = 1) +
+  geom_point(data = graph3_1, aes(x = YM, y = Kospi200, color = "Kospi 200"), shape = 16, size = 2) +
+  geom_bar(data = graph3_1, aes(x = YM, y = TargetVol * 7000),
+           stat = "identity", alpha = 0.7, fill = "blue") +
+  geom_hline(yintercept = 200, size=0.5, color = "black", alpha=0.5)+
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  scale_y_continuous(limits = c(0, 500), breaks = seq(100, 500, 100),
+                     sec.axis = sec_axis(~ . / 7000, name = "Strike Range(Monthly)", breaks = c(0, 0.025,0.05,0.075, 0.1), labels = c("0","5%", "10%","15%", "20%"))) +
+  scale_color_manual(values = c("Kospi 200" = "red")) +
+  labs(x = NULL, y = "Kospi 200", color = "") +
+  theme_minimal() +
+  theme(legend.position = c(0.1, 0.93), legend.direction = "horizontal")
+
+# 요약표 1 : VW포트폴리오
+table1 <- portfolio %>%
+  drop_na(PREMIUM, EXERCISE) %>%
+  mutate(YEAR = substr(BAS_DD, 1, 4),
+         CNT=1,
+         NO=if_else(EXERCISE==0,1,0)) %>%
+  group_by(YEAR) %>%
+  summarise(Expiry = sum(CNT),
+            NoExercise = round(sum(NO)/sum(CNT),2),
+            Premium = round(mean(PREMIUM)/10000,0),
+            Interest = round(mean(INTEREST)/10000,0),
+            Loss = round(mean(EXERCISE)/10000,0),
+            Revenue = round(mean(REVENUE)/10000,0),
+            Return = round(prod(1 + RATE)-1,2),
+            .groups = "drop") %>% 
+  left_join(K200_portfolio %>% group_by(YEAR) %>% summarise(Return_K200=round(prod(RATE_K200)-1,2)),
+            by="YEAR")
+
+# 요약표 2 : 일반 포트폴리오
+table2 <- portfolio2 %>%
+  drop_na(PREMIUM, EXERCISE) %>%
+  mutate(YEAR = substr(BAS_DD, 1, 4),
+         CNT=1,
+         NO=if_else(EXERCISE==0,1,0)) %>%
+  group_by(YEAR) %>%
+  summarise(Expiry = sum(CNT),
+            NoExercise = round(sum(NO)/sum(CNT),2),
+            Premium = round(mean(PREMIUM)/10000,0),
+            Interest = round(mean(INTEREST)/10000,0),
+            Loss = round(mean(EXERCISE)/10000,0),
+            Revenue = round(mean(REVENUE)/10000,0),
+            Return = round(prod(1 + RATE)-1,2),
+            .groups = "drop") %>% 
+  left_join(K200_portfolio %>% group_by(YEAR) %>% summarise(Return_K200=round(prod(RATE_K200)-1,2)),
+            by="YEAR")
+
+# 요약표 3 : 포트폴리오 변동성 비교
+Vol1 <- graph1_1 %>% group_by(YEAR) %>% summarise(Vol=round(sd(RATE)*sqrt(12),2),
+                                                  Vol_K200=round(sd(RATE_K200)*sqrt(12),2))
+Vol2 <- graph1_2 %>% group_by(YEAR) %>% summarise(Vol=round(sd(RATE)*sqrt(12),2))
+
+table3 <- table1 %>% 
+  select(YEAR,Return,Return_K200) %>% 
+  left_join(Vol1, by="YEAR") %>% 
+  mutate(Return_main=Return,
+         Vol_main=Vol) %>% 
+  select(YEAR, Return_main,Vol_main,Return_K200,Vol_K200) %>% 
+  left_join(table2 %>% 
+              select(YEAR,Return) %>% 
+              left_join(Vol2, by="YEAR") %>% 
+              mutate(Return_sub=Return,
+                     Vol_sub=Vol) %>% 
+              select(YEAR,Return_sub,Vol_sub), by="YEAR") %>% 
+  select(YEAR, Return_main, Return_sub, Return_K200, Vol_main, Vol_sub, Vol_K200)
+```
+
+## 1. 개요
+
+본 리포트는 옵션과 변동성지수를 활용한 **변동성 조정 위클리 양매도**전략을 알아보고, **과거 데이터를 통해 구현 및 검증**하기 위해 작성되었습니다. **변동성 조정 위클리 양매도**란 ***1.변동성 조정***, ***2.주단위 매도*** 두가지 특징을 통해 **기존 단점을 보완**한 양매도 전략으로, "매주" V-Kospi200를 이용해 행사가격 범위를 결정하고 콜/풋옵션을 매도(양매도)하게 됩니다.
+
+전략 소개에 앞서 필요한 배경지식을 다루고, 전략 소개 및 구현, 백테스팅 및 성과를 차례로 설명하겠습니다.
+
+## 2. 배경지식
+
+### 양매도 (Short strangle)
+
+**양매도란 옵션 거래전략**으로, 일반적으로 **만기일이 같은 외가격(OTM) 콜/풋옵션을 매도**하는 것을 의미합니다.
+
+OTM 옵션을 매도하므로, 만기일에 기초자산의 가격이 풋옵션의 행사가격과 콜옵션의 행사가격 사이라면 권리행사되지 않게 되고 **옵션 프리미엄(매도수익)을 그대로 얻을 수 있게 됩니다.**
+
+반면, **양매도는 시장의 변동성이 예상과 달리 큰 경우, 큰 손실이 발생할 수 있다는 단점**도 존재합니다. **수익은 프리미엄으로 한정**되어있으나, 시황 급변에 따른 **옵션 손실에는 제한이 없어** 원금 이상의 손실이 발생할 수도 있기 때문입니다.
+
+즉, 양매도는 높은 확률로 **안정적인 중수익을 보장하나 매우 낮은 확률로 큰 손실이 발생할 수 있는 전략**이며, **향후 시장의 변동성이 크지 않을 것이라 예측될 때 주로 사용**됩니다.
+
+![](image/shortstrangle.png){fig-align="center" width="150mm" height="50mm"}
+
+#### 양매도 전략 예시
+
+국내의 경우 행사가격의 상하단을 등가격(ATM) $\pm$ 5%로 설정한 양매도 ETN이 한 때 큰 인기를 끌었습니다. 대표적인 예시인 **월별 코스피200 OTM 5% 양매도 전략**의 거래방법을 살펴보면, 다음과 같습니다.
+
+1.  현재 코스피200지수를 기준으로 ATM+5%의 콜옵션과 ATM-5%의 풋옵션을 매도 (프리미엄 수익 발생)
+2.  다음달 만기일이 되면, 옵션은 청산(권리행사시 손실)되고 다시 ATM $\pm$ 5%의 콜,풋옵션을 매도
+
+즉, **월단위로 옵션을 교체하게 되며 행사가격의 상하단은 ATM** $\pm$ 5%로 고정한 양매도 전략입니다. 중위험-중수익으로 흥행에 성공한 상품이지만, **아래와 같은 한계점**도 존재합니다.
+
+1.  행사가격 범위가 고정되어있어 변동성 확대시 손실 가능성이 커지고, 변동성 축소시 프리미엄 수익이 크게 감소
+2.  옵션 교체주기가 1개월로, 그간 지수의 하락이 누적된다면 손실이 과도하게 커질 수 있음 (유동성 리스크)
+
+### 코스피200 변동성지수 (V-Kospi200 index)
+
+**코스피200 변동성 지수**란 주식 시장의 **변동성을 측정하는 지표**입니다. 코스피200 옵션 가격 기반의 내재변동성을 이용하여 산출되며, 향후 30일간 시장 변동성에 대한 투자자들의 기대를 나타내는 지수입니다.
+
+#### 주요 특징
+
+-   **시장 심리 반영**: 투자자들의 불안 심리를 반영하며, '공포 지수(Fear Index)'라고도 불림
+-   **옵션 가격 기반**: 코스피200 옵션 가격 기반의 내재변동성을 통해 산출되며, 여기에는 투자자들의 기대가 반영
+
+***그래프1 : 일별 코스피200지수 및 코스피200 변동성지수***
+
+![](image/vkospi.png){fig-align="center" width="70%"}
+
+### 코스피200 위클리옵션
+
+**코스피200 위클리옵션**이란 코스피200 지수를 기초자산으로 하는 **주간 단위의 옵션 거래 상품**을 말합니다. '19년 상장되었으며 기존의 월 단위 만기가 도래하는 옵션과는 달리, 매주 월/목요일에 만기가 도래하는 단기 옵션입니다.
+
+#### 주요 특징
+
+-   **세밀한 거래 지원**: 매주 월/목요일에 만기가 도래하여 단기적인 시장 변동에 대한 투자 및 위험 관리에 유리
+-   **다양한 투자 전략 활용:** 단기적인 시장 예측을 기반으로 다양한 투자 전략을 구사할 수 있습니다.
+
+## 3. 전략 소개 및 구현
+
+### 전략 개요
+
+변동성 조정 위클리 양매도(Volatility Adjusted Weekly Short strangle, VWss) 전략이란, 기존에 널리 활용되던 **월별 OTM 5% 양매도 전략**에 아래 두가지 방법을 결합한 전략을 의미합니다.
+
+1.  옵션의 교체주기를 "매월" -\> "매주" 단위로 세분화
+2.  행사가격의 범위를 고정하는 것이 아니라 매 옵션 매도시점마다 시장 변동성을 고려하여 조정
+
+따라서, 기존과 달리 **주단위로 옵션을 교체하며, 행사가격의 범위는 교체시점에 매번 달라지게 됩니다.** 이를 위해 코스피200위클리옵션**을 사용하고, 변동성 지표는** 내재변동성 기반의 V-Kospi200지수를 사용\*\*하여 구현할 계획입니다.
+
+### 행사가격 범위 설정방법
+
+행사가격의 상하단은 **옵션 매도시점의 "전일 V-Kospi200 종가"를 참조하여 설정**할 예정입니다. V-Kospi200는 향후 30일간 코스피200 지수의 변동성을 수치화한 지표로서, 현재시점에서 변동성을 잘 예측할 수 있는 수단이기 때문입니다.
+
+다만, 본 전략에서 옵션 매도포지션의 유지기간은 약 7일이므로 지수 종가(연율)를 주단위 기간에 맞도록 환산하여 행사가격의 상하단을 산출하였습니다.
+
+$$\sigma_{Target}\;=\;\frac{VKospi200_{(T-1)}\times\sqrt{Calendar\;days}}{\sqrt{365}}$$
+
+$$Call\;strike\;=\;Kospi200_{(T)}\times (1+\sigma_{Target})\;rounded\;up\;to\;2.5pt$$
+
+$$Put\;strike\;=\;Kospi200_{(T)}\times (1-\sigma_{Target})\;rounded\;down\;to\;2.5pt$$
+
+이렇게 행사가격을 설정하면 V-Kospi200가 15pt일 때 월환산 변동성이 약 5%(주환산 2.5%)가 됩니다. 즉,
+
+-   시장의 예상 변동성(V-Kospi200)이 연 15% 이상 -\> 행사가격 범위를 기존보다 넓게 설정하여 손실 가능성 축소
+-   시장의 예상 변동성이 연 15% 미만 -\> 행사가격 범위를 기존보다 좁게 설정하여 프리미엄 수익 극대화
+
+::: callout
+본 전략은 위클리옵션을 사용하므로 향후 1주일 변동성이 필요합니다. 따라서, 30일 변동성을 나타내는 V-Kospi200은 만기 mismatch가 있지만, 단기간의 예측치에는 큰 차이가 없고 이외의 대안(e.g. 7-day VIX)이 없어 V-Kospi200를 그대로 사용하였습니다.
+:::
+
+### 포트폴리오 구성 방법
+
+먼저, 편의를 위해 세금/수수료/호가스프레드 등의 거래비용은 없으며 종가에 원하는 수량만큼 거래할 수 있는 **완전자본시장을 가정**하도록 하겠습니다. 전략 구현을 위한 포트폴리오(투자원금 100억원) 구성 과정은 아래와 같습니다.
+
+1.  전일 V-Kospi200 지수를 주단위로 환산하여 예상변동성($\hat\sigma=(VKospi200\times \sqrt{day})/\sqrt{365}$) 산출
+2.  예상변동성을 당일 Kospi200지수에 적용하여 행사가격 상하단(ATM $\pm\hat\sigma$을 2.5pt 단위로 올림/내림) 산출
+3.  당일 Kospi200지수 및 승수(25만)를 적용, 옵션 매도수량($Q_{sell}=nominal/(kospi200\times multiplier)$) 산출
+4.  행사가격 상단 콜옵션, 하단 풋옵션 매도 ($Premium=(call price+put price)\times Q_{sell}\times multiplier$)
+5.  원금과 매도수익을 다음주 만기일까지 MMF에 투자 ($Interest=(nominal+Premium)\times MMF \times \frac{day}{365}$)
+6.  다음주 만기일이 되면, 권리행사 손실을 포함하여 최종손익 산출($Revenue=Premium+Interest-Exercise$)
+    -   Kospi200 \> 행사가격 상단, 콜옵션에서 손실 발생($Exercise=(Kospi200-Strike_{call})\times multiplier$)
+    -   Kospi200 \< 행사가격 하단, 풋옵션에서 손실 발생($Exercise=(Strike_{put}-Kospi200)\times multiplier$)
+    -   이외의 경우, 권리행사되지 않아 옵션 포지션 청산($Exercise=0$)
+7.  주간 최종손익을 정산($nominal_{new}=nominal_{old}+Revenue$)하고, 투자종료시점까지 1. \~ 6. 과정을 반복
+
+## 3. Backtesting
+
+### 데이터 수집 및 전처리, 포트폴리오 구현
+
+과거 5개년(2020\~2024) 코스피200 등의 지수/옵션 가격, 금리를 수집하였으며, 출처는 아래와 같습니다.
+
+```         
+한국거래소 정보데이터시스템(data.krx.co.kr) : 코스피200 및 V-Kospi200지수
+한국거래소 OpenAPI(openapi.krx.co.kr) : 코스피200옵션 및 위클리옵션 종목별 가격
+한국은행 경제통계시스템(ecos.bok.or.kr) : 일별 MMF(7일) 금리
+```
+
+::: {.callout-note title="한국거래소 OpenAPI를 활용한 데이터 수집 예시"}
+![](image/krxopenapi1.png){fig-align="center" width="60%"}
+
+API 호출시 json 데이터를 수집할 수 있으며, 이를 Dataframe(python) 및 tibble(r)로 변환하여 활용하였습니다.
+
+```{python}
+import requests; import json
+url = 'http://data-dbg.krx.co.kr/svc/sample/apis/drv/opt_bydd_trd?basDd=20250312'
+headers = {'AUTH_KEY': '74D1B99DFBF345BBA3FB4476510A4BED4C78D13A'}
+res = requests.get(url=url, headers=headers); res.text
+```
+:::
+
+수집한 데이터는 **R을 이용하여 전처리**하였으며, 두개의 데이터셋으로 요약하였습니다.
+
+1.  **포트폴리오 기본 정보** : 옵션 만기일(매주), 옵션 보유일, MMF금리, Kospi200, 전일 V-K200, 거래대상옵션 정보
+
+```{r}
+#| echo: false
+kable(head(target_info))
+```
+
+2. **거래대상옵션 정보** : 포트폴리오 기본 정보에 대응되는 거래대상옵션의 종가, 거래량(0인 경우 제외)
+
+```{r}
+#| echo: false
+kable(head(target_options))
+```
+
+이를 통해 매도수량, 프리미엄, 이자수익, 권리행사손실 등을 산출하여 **포트폴리오를 구현**하였습니다.
+
+```{r}
+#| echo: false
+kable(portfolio %>% select(BAS_DD,VOL,SELL_AMT,PREMIUM,INTEREST,EXERCISE,REVENUE,RATE) %>% head())
+```
+
+\newpage
+
+::: {.callout-important title="변동성 조정 방법에 따른 행사가격 범위 추이(과거 5년)"}
+
+V-Kospi200과 연동한 행사가격의 범위는 지난 5년간 **1.6% \~ 8.7%까지 광범위하게 형성**되었습니다.
+
+코스피200이 급등락하는 경우 범위가 넓게 형성되고 보합장에서는 좁게 형성되는 추이를 확인할 수 있으며, 이를 월환산($\times\sqrt{4}$)하여 기존 5%와 비교하면 **지수의 상황에 따라 유동적으로 조절되고 있음**을 의미합니다.
+
+\
+
+***그래프2 : 월평균 코스피200지수(적색) 및 행사가격 범위(청색)***
+
+```{r}
+#| echo: false
+#| warning: false
+graph3
+```
+
+:::
+
+\newpage
+
+### Backtesting 성과
+
+**지난 5년간(2020\~2024) VW양매도와 코스피200지수 / OTM 5% 양매도를 비교**해보았습니다.
+
+***표1 : 연도별 변동성 조정 위클리 양매도 포트폴리오 및 코스피200지수 성과***
+
+```{r}
+#| echo: false
+kable(table1)
+```
+
+***표2 : 연도별 일반 양매도 포트폴리오 및 코스피200지수 성과***
+
+```{r}
+#| echo: false
+kable(table2)
+```
+
+::: callout
+**YEAR** : 산출대상 연도 / **Expiry** : 옵션만기 횟수 (프리미엄 수익 발생 횟수)
+
+**NoExercise** : 옵션만기일에 행사되지 않은 비율 (손실이 발생하지 않은 거래일 비율)
+
+**Premium** : 평균 옵션 프리미엄 수익 (만원) / **Interest** : 원금 및 프리미엄에서 발생한 평균 이자수익 (만원)
+
+**Loss** : 옵션권리행사로 인한 평균 손실 (미행사 포함) / **Revenue** : 평균 이익 (Premium + Interest - Loss)
+
+**Return** : 포트폴리오의 연환산 수익률 / **Return_K200** : 코스피200지수의 연환산 수익률
+:::
+
+**변동성 조정 위클리 양매도 포트폴리오**의 주요 성과는 다음과 같습니다.
+
+1.  옵션 매도주기 축소(월간 $\rightarrow$ 주간) : **현금흐름 개선 및 프리미엄 수익 극대화**
+
+-   VW양매도 포트폴리오는 연평균 50회의 수익이 발생하는 반면, 일반 양매도 포트폴리오는 12회(월1회) 발생.
+-   1회 발생 수익은 4배 미만으로 감소하여 평균 수익이 증가하였고, 수익주기가 짧아지면서 현금유동성 개선
+
+2.  행사가격 범위 조정(5% $\rightarrow$ $\sigma$연동) : **포트폴리오 안정성 증가 및 리스크 축소**
+
+-   일반 양매도 전략의 손실발생비율(권리행사비율)은 시장 상황에 따라 0\~50%까지 큰 폭으로 변동
+-   반면, 본 포트폴리오는 행사가격 범위를 변동성 수준에 조정하므로 비율이 10\~30%수준으로 안정화
+-   손실에 대한 예측가능성 및 포트폴리오 변동성이 개선되었으며 1회 손실도 감내 가능한 수준으로 축소
+
+3.  **소결 : VW양매도 전략은 수익률, 리스크 측면에서 코스피200지수 및 일반 양매도 전략을 Outperform**
+
+\newpage
+
+***그래프3, 4 : 지난 5년 및 3년간 코스피200지수, VW양매도, 5%양매도 누적수익률 및 초과수익***
+
+```{r}
+#| echo: false
+#| warning: false
+graph1
+```
+
+```{r}
+#| echo: false
+#| warning: false
+graph2
+```
+
+***표3 : 연도별 VW양매도, 일반 양매도, 코스피200지수의 수익률 및 변동성(월간수익률의 연환산)***
+
+```{r}
+#| echo: false
+#| warning: false
+kable(table3)
+```
+
+그래프와 표를 통해 **VW양매도 전략**이 타 전략 대비 **안정적이고 높은 수익을 실현**하였음을 확인할 수 있었습니다.
+
+### 한계점
+
+그러나, **행사가격 범위가 전일 V-Kospi200 지수에 따라 결정**되므로 옵션 매도일 및 보유기간 중 V-Kospi200 지수가 급등락하는 경우 **시장 변동성을 적절히 반영되지 않을 가능성**이 있습니다.
+
+-   당일 장중 지수를 사용할 수 있겠으나 종가보다 신뢰성이 높다고 보기 어렵고, 당일 종가는 매도시점에서 확인 불가
+-   보유기간 중 V-Kospi200의 변동에 따라 옵션 행사가격을 리밸런싱하면 보다 정확히 변동성을 반영할 수 있으나, 잦은 거래로 인해 수반되는 비용이 급증
+-   시장 변동성이 적절히 반영되지 않는 경우, 프리미엄 수익성이 낮아지고 옵션 권리행사 위험이 증가할 수 있음
+
+또한, **실제로 VW양매도 포트폴리오를 운영**한다면 **거래비용 및 유동성 등의 한계점**으로 인해 보완해야할 점이 있으며 이 과정에서 초과수익률 등의 **성과가 다소 희석**될 것으로 예상됩니다.
+
+-   수수료/유동성 등으로 인해 자주 옵션을 매도하는 전략 특성상 거래비용 상승이 수반됨
+-   월물 옵션 대비 위클리옵션의 유동성이 낮아, 변동성 확대 국면에서 원하는 위클리옵션의 거래가 없을 수 있음
+
+## 4. 포트폴리오 검증 ('25.3.13 ~ 4.10)
+
+포트폴리오의 성과 검증을 위해 **'25년 3월 옵션만기일부터 1개월간의 성과를 측정**해보겠습니다.
+
+**Backtesting과 동일한 방식으로 진행**하였으며, 날짜 등 일부를 제외하고 동일 코드를 재사용하였습니다.
+
+```{r}
+#| echo: false
+#| eval: true
+#| warning: false
+#| error: false
+#| output: false
+
+rm(list=ls())
+library(tidyverse)
+library(knitr)
+library(patchwork)
+
+# 1. 원본데이터 준비
+options_raw <- read_csv("data/options_data_test.csv") %>% tibble()
+idx_raw <- read_csv("data/idx_data_test.csv") %>% tibble()
+mmf_raw <- read_csv("data/mmf_test.csv") %>% tibble()
+
+# 2-1. 데이터 전처리 : KRX openAPI 옵션데이터 전처리
+options <- options_raw %>% 
+  # K200, WK200 이외의 옵션 제외
+  filter(substr(PROD_NM,1,3)=="코스피") %>%
+  # 종가가 없는 경우 익일 기준가격(이론가격) 사용
+  mutate(PRICE = as.double(if_else(TDD_CLSPRC=="-",NXTDD_BAS_PRC,TDD_CLSPRC))) %>% 
+  drop_na(PRICE) %>% 
+  select(BAS_DD,ISU_NM,PRICE,ACC_TRDVOL) %>% 
+  separate(ISU_NM, into=c("PROD","RGHT","EXP","EXER_PRC"), sep=' ') %>%
+  mutate(EXER_PRC=as.double(EXER_PRC),
+         EXPMM=if_else(PROD=="코스피200",substr(EXP,3,6),substr(EXP,1,4)),
+         EXPWW=if_else(PROD=="코스피200",2,as.integer(substr(EXP,6,6)))) %>% 
+  filter(EXER_PRC>min(idx_raw$KOSPI200)*0.85,
+         EXER_PRC<max(idx_raw$KOSPI200)*1.15,
+         PROD!="코스피위클리M") %>% # 월요일 만기 위클리옵션 제외
+  mutate(PRIOR=as.integer(EXPMM)*10+EXPWW) # 만기가 짧은 순으로 우선순위 부여
+
+# 2-2. 데이터 전처리 : 옵션 만기일 데이터 생성
+target_date <- options %>% 
+  distinct(.,BAS_DD, PRIOR) %>% 
+  arrange(PRIOR, desc(BAS_DD)) %>% 
+  group_by(PRIOR) %>% 
+  slice(1) %>% 
+  ungroup() %>% 
+  distinct(BAS_DD) %>% 
+  arrange(desc(BAS_DD)) %>% 
+  filter(BAS_DD<20250411)
+
+# 2-3. 데이터 전처리 : KRX 정보데이터시스템 K200 및 V-K200지수 전처리
+idx_data <- idx_raw %>%
+  arrange(BAS_DD) %>% 
+  mutate(LAG_K200=lag(KOSPI200),
+         LAG_VK200=lag(VKOSPI200))
+
+K200_portfolio=idx_data %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  mutate(RATE=(KOSPI200-LAG_K200)/LAG_K200,
+         YEAR = substr(BAS_DD, 1, 4),
+         YM = ym(substr(BAS_DD, 1, 6))) %>%
+  group_by(YEAR) %>%
+  filter(is.na(RATE)==FALSE) %>% 
+  summarise(RATE_K200 = prod(1 + RATE),
+            MMF = mean(MMF)/100,
+            .groups = "drop") %>%
+  ungroup()
+
+# 3-1. 포트폴리오 구성 : VW양매도 포트폴리오 기초정보 생성
+target_info <- target_date %>% 
+  left_join(options, by="BAS_DD") %>% 
+  distinct(BAS_DD,PRIOR) %>% 
+  arrange(desc(BAS_DD),PRIOR) %>% 
+  group_by(BAS_DD) %>% 
+  # 만기가 도래하는 옵션을 제외하고 우선순위가 높은 옵션 선택
+  slice(2) %>% 
+  ungroup() %>% 
+  arrange(desc(BAS_DD)) %>% 
+  left_join(idx_data, by="BAS_DD") %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  # 옵션 보유기간 및 단기금리(MMF) 계산
+  mutate(DIFF_DAY=as.integer(ymd(lag(BAS_DD))-ymd(BAS_DD)),
+         MMF=MMF*0.01) %>% 
+  # 옵션 보유기간에 해당하는 시장기대변동성 계산(V-K200활용)
+  mutate(VOL=LAG_VK200*sqrt(DIFF_DAY)/sqrt(365)/100) %>%
+  # 변동성에 따른 옵션 행사가격 상단(2.5단위 올림) 및 하단(2.5단위 내림) 계산
+  mutate(TARGET_C_K=ceiling(KOSPI200*(1+VOL)*0.4)/0.4,
+         TARGET_P_K=floor(KOSPI200*(1-VOL)*0.4)/0.4) %>% 
+  # drop_na(DIFF_DAY) %>% 
+  select(BAS_DD,VOL,DIFF_DAY,MMF,KOSPI200,LAG_VK200,PRIOR,TARGET_C_K,TARGET_P_K)
+
+# 3-2. 포트폴리오 구성 : VW양매도 포트폴리오 거래대상 옵션 정보 생성
+target_options <- target_info %>% 
+  select(BAS_DD, PRIOR, TARGET_C_K, TARGET_P_K) %>% 
+  pivot_longer(cols=c("TARGET_C_K","TARGET_P_K"),names_to = "GRP", values_to = "EXER_PRC") %>% 
+  mutate(RGHT=substr(GRP,8,8)) %>% 
+  left_join(options,by=c("BAS_DD","PRIOR","RGHT","EXER_PRC")) %>%
+  select(BAS_DD,GRP,PRICE,ACC_TRDVOL) %>% 
+  pivot_wider(names_from = "GRP", values_from = c("PRICE","ACC_TRDVOL"))
+
+# 원금 100억원 가정
+cash = 10000*10000*100
+
+# 4. 포트폴리오 구현 : VW양매도 전략을 구현하여 일자별 손익 계산
+portfolio <- target_info %>% 
+  left_join(target_options,by="BAS_DD") %>% 
+  arrange(BAS_DD) %>% 
+  # 원금에 따른 옵션 매도수량 계산
+  mutate(SELL_AMT=cash/250000/KOSPI200) %>% 
+  # 옵션 프리미엄(매도수익)) 계산
+  mutate(PREMIUM=SELL_AMT*(PRICE_TARGET_C_K+PRICE_TARGET_P_K)*250000) %>% 
+  # 원금 및 프리미엄의 MMF 이자수익 및 권리행사손실 계산
+  mutate(INTEREST=(cash+replace_na(PREMIUM,0))*MMF*DIFF_DAY/365,
+         EXERCISE=(if_else(lead(KOSPI200)-TARGET_C_K>0,lead(KOSPI200)-TARGET_C_K,0)+
+                     if_else(TARGET_P_K-lead(KOSPI200)>0,TARGET_P_K-lead(KOSPI200),0))*250000*SELL_AMT) %>% 
+  # 주단위 포트폴리오 손익 계산(원금 100억 가정, 당일 투자시 다음주 실현손익을 의미)
+  mutate(REVENUE=PREMIUM+INTEREST-EXERCISE) %>% 
+  # 거래대상 옵션이 상장되어있지 않은 경우, MMF수익만 고려
+  mutate(REVENUE=if_else(is.na(REVENUE),INTEREST,REVENUE)) %>% 
+  mutate(RATE=REVENUE/cash,
+         Group="Vol-adj. Weekly")  # 주단위 포트폴리오 수익률
+
+# 5. 비교군 포트폴리오 생성 : 월별 5% OTM 양매도 전략
+options2 <- options %>% 
+  filter(PROD=="코스피200")
+
+# 옵션 만기일(매달) 생성
+target_date2 <- options2 %>% 
+  distinct(.,BAS_DD, PRIOR) %>% 
+  arrange(PRIOR, desc(BAS_DD)) %>% 
+  group_by(PRIOR) %>% 
+  slice(1) %>% 
+  ungroup() %>% 
+  distinct(BAS_DD) %>% 
+  arrange(desc(BAS_DD)) %>% 
+  filter(BAS_DD<20250411)
+
+# 일반 양매도 포트폴리오 기본 정보 생성
+target_info2 <- target_date2 %>% 
+  left_join(options2, by="BAS_DD") %>% 
+  distinct(BAS_DD,PRIOR) %>% 
+  arrange(desc(BAS_DD),PRIOR) %>% 
+  group_by(BAS_DD) %>% 
+  # 만기가 도래하는 옵션을 제외하고 우선순위가 높은 옵션 선택
+  slice(2) %>% 
+  ungroup() %>% 
+  arrange(desc(BAS_DD)) %>% 
+  left_join(idx_data, by="BAS_DD") %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  # 옵션 보유기간 및 단기금리(MMF) 계산
+  mutate(DIFF_DAY=as.integer(ymd(lag(BAS_DD))-ymd(BAS_DD)),
+         MMF=MMF*0.01,
+         VOL=0.05) %>%
+  # 변동성에 따른 옵션 행사가격 상단(2.5단위 올림) 및 하단(2.5단위 내림) 계산
+  mutate(TARGET_C_K=ceiling(KOSPI200*(1+VOL)*0.4)/0.4,
+         TARGET_P_K=floor(KOSPI200*(1-VOL)*0.4)/0.4) %>% 
+  mutate(DIFF_DAY=if_else(is.na(DIFF_DAY),28,DIFF_DAY)) %>% 
+  select(BAS_DD,VOL,DIFF_DAY,MMF,KOSPI200,LAG_VK200,PRIOR,TARGET_C_K,TARGET_P_K)
+
+# 일반 양매도 포트폴리오 거래대상 옵션
+target_options2 <- target_info2 %>% 
+  select(BAS_DD, PRIOR, TARGET_C_K, TARGET_P_K) %>% 
+  pivot_longer(cols=c("TARGET_C_K","TARGET_P_K"),names_to = "GRP", values_to = "EXER_PRC") %>% 
+  mutate(RGHT=substr(GRP,8,8)) %>% 
+  left_join(options2,by=c("BAS_DD","PRIOR","RGHT","EXER_PRC")) %>%
+  select(BAS_DD,GRP,PRICE,ACC_TRDVOL) %>% 
+  pivot_wider(names_from = "GRP", values_from = c("PRICE","ACC_TRDVOL"))
+
+# 일반 양매도 포트폴리오 구현
+portfolio2 <- target_info2 %>% 
+  left_join(target_options2,by="BAS_DD") %>% 
+  arrange(BAS_DD) %>% 
+  # 원금에 따른 옵션 매도수량 계산
+  mutate(SELL_AMT=cash/250000/KOSPI200) %>% 
+  # 옵션 프리미엄(매도수익)) 계산
+  mutate(PREMIUM=SELL_AMT*(PRICE_TARGET_C_K+PRICE_TARGET_P_K)*250000) %>% 
+  # 원금 및 프리미엄의 MMF 이자수익 및 권리행사손실 계산
+  mutate(INTEREST=(cash+replace_na(PREMIUM,0))*MMF*DIFF_DAY/365,
+         EXERCISE=(if_else(lead(KOSPI200)-TARGET_C_K>0,lead(KOSPI200)-TARGET_C_K,0)+
+                     if_else(TARGET_P_K-lead(KOSPI200)>0,TARGET_P_K-lead(KOSPI200),0))*250000*SELL_AMT) %>% 
+  mutate(EXERCISE=if_else(is.na(EXERCISE),0,EXERCISE)) %>% 
+  # 주단위 포트폴리오 손익 계산(원금 100억 가정, 당일 투자시 다음주 실현손익을 의미)
+  mutate(REVENUE=PREMIUM+INTEREST-EXERCISE) %>% 
+  # 거래대상 옵션이 상장되어있지 않은 경우, MMF수익만 고려
+  mutate(REVENUE=if_else(is.na(REVENUE),INTEREST,REVENUE)) %>% 
+  mutate(RATE=REVENUE/cash,
+         Group="Monthly") # 주단위 포트폴리오 수익률
+
+portfolio <- portfolio %>% filter(BAS_DD!=20250410)
+portfolio2 <- portfolio2 %>% filter(BAS_DD!=20250410)
+portfolio3 <- portfolio %>% 
+  summarise(across(where(is.numeric), sum)) %>% 
+  mutate(Group="Vol-adj. Weekly Sum")
+  
+
+# 요약표 4 : 검증 자료
+table4 <- portfolio %>%
+  union_all(portfolio2) %>%
+  union_all(portfolio3) %>% 
+  group_by(BAS_DD, Group) %>%
+  summarise(Premium = round(mean(PREMIUM)/10000,0),
+            Interest = round(mean(INTEREST)/10000,0),
+            Loss = round(mean(EXERCISE)/10000,0),
+            Revenue = round(mean(REVENUE)/10000,0),
+            Return = round(prod(1 + RATE)-1,2),
+            .groups = "drop")
+
+# 그래프 4 : 검증기간중 코스피200지수 추이
+graph4 <- ggplot(idx_raw, aes(x = ymd(BAS_DD))) +
+  geom_line(aes(y = KOSPI200, color = "KOSPI200"), size = 1.2) +
+  geom_line(aes(y = (VKOSPI200 - 19) / 26 * 60 + 300, color = "VKOSPI200"), size = 1.2) +
+  geom_vline(xintercept = ymd(c("20250313", "20250320", "20250327", "20250403","20250410")),
+             linetype = "dotted", color = "grey40") +
+  scale_y_continuous(name = "KOSPI200",limits = c(300, 360),
+                     sec.axis = sec_axis(
+                       ~ (.-300) / 60 * 26 + 19, name = "VKOSPI200")) +
+  scale_color_manual(values = c("KOSPI200" = "blue", "VKOSPI200" = "red"),
+                     guide = guide_legend(direction = "horizontal")) +
+  labs(title = "Kospi200 & V-Kospi200 indices",x = NULL,color = NULL) +
+  theme_minimal() +
+  scale_x_date(date_breaks = "3 days", date_labels = "%m-%d") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(0.5, 0.95))
+```
+
+***표4 : 검증기간('25.3.13 ~ 4.10) VW양매도 및 일반 양매도 전략 성과***
+
+```{r}
+#| echo: false
+#| warning: false
+kable(table4)
+```
+
+**검증기간 중 VW양매도 전략은 옵션을 4회 매도하였고, 일반 양매도는 1회 매도**하였습니다.
+
+VW양매도 전략의 **프리미엄이 4회 발생하면서 수익성은 개선**되었지만, 세번째 매도시기에 **큰 손실이 발생하면서 순이익이 악화**되었습니다. 벡테스팅 결과와 비교할 때 **상반된 결과**입니다.
+
+그 **원인은 최근 트럼프 행정부의 관세 부과 정책의 영향**으로, 증시가 이례적으로 급등락한 데에서 찾을 수 있었습니다.
+
+\newpage
+
+***그래프5 : 검증기간('25.3.13 ~ 4.10) Kospi200 및 V-Kospi200 지수 추이***
+```{r}
+#| echo: false
+#| warning: false
+graph4
+```
+
+먼저, **3.27일 예상변동성(V-K200)이 낮아 행사가격 범위가 좁게 형성**되어 VW양매도 전략이 실행되었고, 이후 관세 정책 영향으로 지수가 급락하면서 **큰 손실이 발생**하게 되었습니다.
+
+반면 **월별 전략은 만기 직전에 관세가 연기**되면서 **증시가 회복**하였고(304 > 325), 손실을 피하게 되었습니다. 
+
+다소 아쉬운 결과이나, **VW양매도 전략의 한계점과 특수한 상황에서는 오히려 불리하다는 점**을 알 수 있었습니다.
+
+1. VW양매도 전략은 **시장 변동성이 적절히 반영되지 않을 가능성**이 있고, 이 경우 예기치 못한 손실이 발생할 수 있음
+2. **옵션 만기가 짧은 것은 일반적**으로 수익성, 유동성 등에서 **장점**이 있으나, **증시가 급락 후 회복하는 상황에서는 만기가 긴 옵션이 유리**할 수 있음
+
+\newpage
+
+## 5. Appendix : Python, R code
+
+### Pyhon code : 데이터 수집 및 전처리
+
+```{python}
+#| echo: true
+#| eval: false
+import requests
+import json
+import pandas as pd
+import aiohttp
+import asyncio
+
+# KRX OpenAPI 예시
+url = 'http://data-dbg.krx.co.kr/svc/sample/apis/drv/opt_bydd_trd?basDd=20250312'
+headers = {'AUTH_KEY': '74D1B99DFBF345BBA3FB4476510A4BED4C78D13A'}
+res = requests.get(url=url, headers=headers)
+res.text
+
+# KRX OpenAPI를 이용한 옵션 데이터 수집 (네트워크 병렬 처리)
+idx_data = pd.read_csv('data/idx_data.csv')
+url = 'http://data-dbg.krx.co.kr/svc/apis/drv/opt_bydd_trd?basDd='
+key = 'BDFA640BBCE84C4B8A465EA024D50D6F3FD909FF'
+
+async def fetch(session, url, bas_dd):
+    async with session.get(url + bas_dd, headers={'AUTH_KEY': key}) as response:
+        return await response.json()
+
+async def fetch_all(bas_dd_list, url):
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch(session, url, str(bas_dd)) for bas_dd in bas_dd_list]
+        return await asyncio.gather(*tasks)
+
+async def main():
+    bas_dd_list = idx_data['BAS_DD'].astype(str).tolist()
+    responses = await fetch_all(bas_dd_list, url)
+
+    data_list = [pd.json_normalize(res['OutBlock_1']) for res in responses if 'OutBlock_1' in res and res['OutBlock_1']]
+    options = pd.concat(data_list, axis=0, ignore_index=True)
+
+    # CSV 저장
+    options.to_csv("options_data.csv", encoding="utf-8-sig", index=False)
+    print("complete")
+```
+
+### R code 1 : 데이터 가공, Backtesting
+
+```{r}
+#| echo: true
+#| eval: false
+#| warning: false
+#| error: false
+
+rm(list=ls())
+library(tidyverse)
+library(knitr)
+library(patchwork)
+
+# 1. 원본데이터 준비
+options_raw <- read_csv("data/options_data.csv") %>% tibble()
+idx_raw <- read_csv("data/idx_data.csv") %>% tibble()
+mmf_raw <- read_csv("data/mmf.csv") %>% tibble()
+
+# 2-1. 데이터 전처리 : KRX openAPI 옵션데이터 전처리
+options <- options_raw %>% 
+  # K200, WK200 이외의 옵션 제외
+  filter(substr(PROD_NM,1,3)=="코스피") %>%
+  # 종가가 없는 경우 익일 기준가격(이론가격) 사용
+  mutate(PRICE = as.double(if_else(TDD_CLSPRC=="-",NXTDD_BAS_PRC,TDD_CLSPRC))) %>% 
+  drop_na(PRICE) %>% 
+  select(BAS_DD,ISU_NM,PRICE,ACC_TRDVOL) %>% 
+  separate(ISU_NM, into=c("PROD","RGHT","EXP","EXER_PRC"), sep=' ') %>%
+  mutate(EXER_PRC=as.double(EXER_PRC),
+         EXPMM=if_else(PROD=="코스피200",substr(EXP,3,6),substr(EXP,1,4)),
+         EXPWW=if_else(PROD=="코스피200",2,as.integer(substr(EXP,6,6)))) %>% 
+  filter(EXER_PRC>min(idx_raw$KOSPI200)*0.85,
+         EXER_PRC<max(idx_raw$KOSPI200)*1.15,
+         PROD!="코스피위클리M") %>% # 월요일 만기 위클리옵션 제외
+  mutate(PRIOR=as.integer(EXPMM)*10+EXPWW) # 만기가 짧은 순으로 우선순위 부여
+
+# 2-2. 데이터 전처리 : 옵션 만기일 데이터 생성
+target_date <- options %>% 
+  distinct(.,BAS_DD, PRIOR) %>% 
+  arrange(PRIOR, desc(BAS_DD)) %>% 
+  group_by(PRIOR) %>% 
+  slice(1) %>% 
+  ungroup() %>% 
+  distinct(BAS_DD) %>% 
+  arrange(desc(BAS_DD)) %>% 
+  filter(BAS_DD<20241231, BAS_DD>20200101)
+
+# 2-3. 데이터 전처리 : KRX 정보데이터시스템 K200 및 V-K200지수 전처리
+idx_data <- idx_raw %>%
+  arrange(BAS_DD) %>% 
+  mutate(LAG_K200=lag(KOSPI200),
+         LAG_VK200=lag(VKOSPI200))
+
+K200_portfolio=idx_data %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  mutate(RATE=(KOSPI200-LAG_K200)/LAG_K200,
+         YEAR = substr(BAS_DD, 1, 4),
+         YM = ym(substr(BAS_DD, 1, 6))) %>%
+  group_by(YEAR, YM) %>%
+  summarise(RATE_K200 = if_else(is.na(prod(1 + RATE)),0,prod(1 + RATE)),
+            MMF = mean(MMF)/100,
+            .groups = "drop") %>%
+  ungroup()
+
+# 3-1. 포트폴리오 구성 : VW양매도 포트폴리오 기초정보 생성
+target_info <- target_date %>% 
+  left_join(options, by="BAS_DD") %>% 
+  distinct(BAS_DD,PRIOR) %>% 
+  arrange(desc(BAS_DD),PRIOR) %>% 
+  group_by(BAS_DD) %>% 
+  # 만기가 도래하는 옵션을 제외하고 우선순위가 높은 옵션 선택
+  slice(2) %>% 
+  ungroup() %>% 
+  arrange(desc(BAS_DD)) %>% 
+  left_join(idx_data, by="BAS_DD") %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  # 옵션 보유기간 및 단기금리(MMF) 계산
+  mutate(DIFF_DAY=as.integer(ymd(lag(BAS_DD))-ymd(BAS_DD)),
+         MMF=MMF*0.01) %>% 
+  # 옵션 보유기간에 해당하는 시장기대변동성 계산(V-K200활용)
+  mutate(VOL=LAG_VK200*sqrt(DIFF_DAY)/sqrt(365)/100) %>%
+  # 변동성에 따른 옵션 행사가격 상단(2.5단위 올림) 및 하단(2.5단위 내림) 계산
+  mutate(TARGET_C_K=ceiling(KOSPI200*(1+VOL)*0.4)/0.4,
+         TARGET_P_K=floor(KOSPI200*(1-VOL)*0.4)/0.4) %>% 
+  drop_na(DIFF_DAY) %>% 
+  select(BAS_DD,VOL,DIFF_DAY,MMF,KOSPI200,LAG_VK200,PRIOR,TARGET_C_K,TARGET_P_K)
+
+# 3-2. 포트폴리오 구성 : VW양매도 포트폴리오 거래대상 옵션 정보 생성
+target_options <- target_info %>% 
+  select(BAS_DD, PRIOR, TARGET_C_K, TARGET_P_K) %>% 
+  pivot_longer(cols=c("TARGET_C_K","TARGET_P_K"),names_to = "GRP", values_to = "EXER_PRC") %>% 
+  mutate(RGHT=substr(GRP,8,8)) %>% 
+  left_join(options,by=c("BAS_DD","PRIOR","RGHT","EXER_PRC")) %>%
+  select(BAS_DD,GRP,PRICE,ACC_TRDVOL) %>% 
+  pivot_wider(names_from = "GRP", values_from = c("PRICE","ACC_TRDVOL"))
+
+# 원금 100억원 가정
+cash = 10000*10000*100
+
+# 4. 포트폴리오 구현 : VW양매도 전략을 구현하여 일자별 손익 계산
+portfolio <- target_info %>% 
+  left_join(target_options,by="BAS_DD") %>% 
+  arrange(BAS_DD) %>% 
+  # 원금에 따른 옵션 매도수량 계산
+  mutate(SELL_AMT=cash/250000/KOSPI200) %>% 
+  # 옵션 프리미엄(매도수익)) 계산
+  mutate(PREMIUM=SELL_AMT*(PRICE_TARGET_C_K+PRICE_TARGET_P_K)*250000) %>% 
+  # 원금 및 프리미엄의 MMF 이자수익 및 권리행사손실 계산
+  mutate(INTEREST=(cash+replace_na(PREMIUM,0))*MMF*DIFF_DAY/365,
+         EXERCISE=(if_else(lead(KOSPI200)-TARGET_C_K>0,lead(KOSPI200)-TARGET_C_K,0)+
+                     if_else(TARGET_P_K-lead(KOSPI200)>0,TARGET_P_K-lead(KOSPI200),0))*250000*SELL_AMT) %>% 
+  # 주단위 포트폴리오 손익 계산(원금 100억 가정, 당일 투자시 다음주 실현손익을 의미)
+  mutate(REVENUE=PREMIUM+INTEREST-EXERCISE) %>% 
+  # 거래대상 옵션이 상장되어있지 않은 경우, MMF수익만 고려
+  mutate(REVENUE=if_else(is.na(REVENUE),INTEREST,REVENUE)) %>% 
+  mutate(RATE=REVENUE/cash)  # 주단위 포트폴리오 수익률
+
+# 5. 비교군 포트폴리오 생성 : 월별 5% OTM 양매도 전략
+options2 <- options %>% 
+  filter(PROD=="코스피200")
+
+# 옵션 만기일(매달) 생성
+target_date2 <- options2 %>% 
+  distinct(.,BAS_DD, PRIOR) %>% 
+  arrange(PRIOR, desc(BAS_DD)) %>% 
+  group_by(PRIOR) %>% 
+  slice(1) %>% 
+  ungroup() %>% 
+  distinct(BAS_DD) %>% 
+  arrange(desc(BAS_DD)) %>% 
+  filter(BAS_DD<20241231, BAS_DD>20200101)
+
+# 일반 양매도 포트폴리오 기본 정보 생성
+target_info2 <- target_date2 %>% 
+  left_join(options2, by="BAS_DD") %>% 
+  distinct(BAS_DD,PRIOR) %>% 
+  arrange(desc(BAS_DD),PRIOR) %>% 
+  group_by(BAS_DD) %>% 
+  # 만기가 도래하는 옵션을 제외하고 우선순위가 높은 옵션 선택
+  slice(2) %>% 
+  ungroup() %>% 
+  arrange(desc(BAS_DD)) %>% 
+  left_join(idx_data, by="BAS_DD") %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  # 옵션 보유기간 및 단기금리(MMF) 계산
+  mutate(DIFF_DAY=as.integer(ymd(lag(BAS_DD))-ymd(BAS_DD)),
+         MMF=MMF*0.01,
+         VOL=0.05) %>%
+  # 변동성에 따른 옵션 행사가격 상단(2.5단위 올림) 및 하단(2.5단위 내림) 계산
+  mutate(TARGET_C_K=ceiling(KOSPI200*(1+VOL)*0.4)/0.4,
+         TARGET_P_K=floor(KOSPI200*(1-VOL)*0.4)/0.4) %>% 
+  mutate(DIFF_DAY=if_else(is.na(DIFF_DAY),28,DIFF_DAY)) %>% 
+  select(BAS_DD,VOL,DIFF_DAY,MMF,KOSPI200,LAG_VK200,PRIOR,TARGET_C_K,TARGET_P_K)
+
+# 일반 양매도 포트폴리오 거래대상 옵션
+target_options2 <- target_info2 %>% 
+  select(BAS_DD, PRIOR, TARGET_C_K, TARGET_P_K) %>% 
+  pivot_longer(cols=c("TARGET_C_K","TARGET_P_K"),names_to = "GRP", values_to = "EXER_PRC") %>% 
+  mutate(RGHT=substr(GRP,8,8)) %>% 
+  left_join(options2,by=c("BAS_DD","PRIOR","RGHT","EXER_PRC")) %>%
+  select(BAS_DD,GRP,PRICE,ACC_TRDVOL) %>% 
+  pivot_wider(names_from = "GRP", values_from = c("PRICE","ACC_TRDVOL"))
+
+# 일반 양매도 포트폴리오 구현
+portfolio2 <- target_info2 %>% 
+  left_join(target_options2,by="BAS_DD") %>% 
+  arrange(BAS_DD) %>% 
+  # 원금에 따른 옵션 매도수량 계산
+  mutate(SELL_AMT=cash/250000/KOSPI200) %>% 
+  # 옵션 프리미엄(매도수익)) 계산
+  mutate(PREMIUM=SELL_AMT*(PRICE_TARGET_C_K+PRICE_TARGET_P_K)*250000) %>% 
+  # 원금 및 프리미엄의 MMF 이자수익 및 권리행사손실 계산
+  mutate(INTEREST=(cash+replace_na(PREMIUM,0))*MMF*DIFF_DAY/365,
+         EXERCISE=(if_else(lead(KOSPI200)-TARGET_C_K>0,lead(KOSPI200)-TARGET_C_K,0)+
+                     if_else(TARGET_P_K-lead(KOSPI200)>0,TARGET_P_K-lead(KOSPI200),0))*250000*SELL_AMT) %>% 
+  mutate(EXERCISE=if_else(is.na(EXERCISE),0,EXERCISE)) %>% 
+  # 주단위 포트폴리오 손익 계산(원금 100억 가정, 당일 투자시 다음주 실현손익을 의미)
+  mutate(REVENUE=PREMIUM+INTEREST-EXERCISE) %>% 
+  # 거래대상 옵션이 상장되어있지 않은 경우, MMF수익만 고려
+  mutate(REVENUE=if_else(is.na(REVENUE),INTEREST,REVENUE)) %>% 
+  mutate(RATE=REVENUE/cash) # 주단위 포트폴리오 수익률
+
+# 6. 성과분석 : VW양매도 포트폴리오
+performance <- portfolio %>%
+  drop_na(PREMIUM, EXERCISE) %>%
+  mutate(YEAR = substr(BAS_DD, 1, 4),
+         YM = ym(substr(BAS_DD, 1, 6))) %>%
+  group_by(YEAR, YM) %>%
+  summarise(PREMIUM = sum(PREMIUM),
+            INTEREST = sum(INTEREST),
+            EXERCISE = sum(EXERCISE),
+            REVENUE = sum(REVENUE),
+            RATE = prod(1 + RATE),
+            .groups = "drop") %>%
+  ungroup()
+
+# 6. 성과분석 : 일반 양매도 포트폴리오
+performance2 <- portfolio2 %>%
+  drop_na(PREMIUM, EXERCISE) %>%
+  mutate(YEAR = substr(BAS_DD, 1, 4),
+         YM = ym(substr(BAS_DD, 1, 6))) %>%
+  group_by(YEAR, YM) %>%
+  summarise(PREMIUM = sum(PREMIUM),
+            INTEREST = sum(INTEREST),
+            EXERCISE = sum(EXERCISE),
+            REVENUE = sum(REVENUE),
+            RATE = prod(1 + RATE),
+            .groups = "drop") %>%
+  ungroup()
+
+# 시각화 등
+graph1_1 <- performance %>%
+  arrange(YM) %>%
+  left_join(K200_portfolio,by=c("YEAR","YM")) %>% 
+  mutate(CUM_RATE = cumprod(RATE) * 100 - 100,
+         CUM_RATE_K200 = cumprod(RATE_K200) * 100 - 100) %>% 
+  bind_rows(tibble(YM=ym(201912),CUM_RATE=0,CUM_RATE_K200=0))
+  
+
+graph1_2 <- performance2 %>%
+  arrange(YM) %>%
+  left_join(K200_portfolio,by=c("YEAR","YM")) %>% 
+  mutate(CUM_RATE = cumprod(RATE) * 100 - 100,
+         CUM_RATE_K200 = cumprod(RATE_K200) * 100 - 100) %>% 
+  bind_rows(tibble(YM=ym(201912),CUM_RATE=0,CUM_RATE_K200=0))
+
+graph1_3 <- graph1_1 %>%
+  inner_join(graph1_2, by = "YM", suffix = c("_1", "_2")) %>%
+  mutate(REVENUE_DIFF = (REVENUE_1 - REVENUE_2) / 1e8)
+
+graph2_1 <- performance %>%
+  arrange(YM) %>%
+  left_join(K200_portfolio,by=c("YEAR","YM")) %>% 
+  filter(as.integer(YEAR) > 2021) %>%
+  mutate(CUM_RATE = cumprod(RATE) * 100 - 100,
+         CUM_RATE_K200 = cumprod(RATE_K200) * 100 - 100) %>% 
+  bind_rows(tibble(YM=ym(202112),CUM_RATE=0,CUM_RATE_K200=0))
+
+graph2_2 <- performance2 %>%
+  arrange(YM) %>%
+  left_join(K200_portfolio,by=c("YEAR","YM")) %>% 
+  filter(as.integer(YEAR) > 2021) %>%
+  mutate(CUM_RATE = cumprod(RATE) * 100 - 100,
+         CUM_RATE_K200 = cumprod(RATE_K200) * 100 - 100) %>% 
+  bind_rows(tibble(YM=ym(202112),CUM_RATE=0,CUM_RATE_K200=0))
+
+graph2_3 <- graph2_1 %>%
+  inner_join(graph2_2, by = "YM", suffix = c("_1", "_2")) %>%
+  mutate(REVENUE_DIFF = (REVENUE_1 - REVENUE_2) / 1e8)
+
+graph3_1 <- portfolio %>%
+  mutate(YM = ym(substr(BAS_DD, 1, 6))) %>%
+  group_by(YM) %>%
+  summarise(TargetVol=mean(VOL),
+            Kospi200=mean(KOSPI200)) %>% ungroup()
+
+graph1=ggplot() +
+  geom_line(data = graph1_1, aes(x = YM, y = CUM_RATE, color = "Vol-adj. Weekly"), size = 1) +
+  geom_point(data = graph1_1, aes(x = YM, y = CUM_RATE, color = "Vol-adj. Weekly"), shape = 16, size = 2) +
+  geom_line(data = graph1_2, aes(x = YM, y = CUM_RATE, color = "5% OTM Monthly"), size = 1) +
+  geom_point(data = graph1_2, aes(x = YM, y = CUM_RATE, color = "5% OTM Monthly"), shape = 16, size = 2) +
+  geom_line(data = graph1_1, aes(x = YM, y = CUM_RATE_K200, color = "Kospi 200"), size = 1, alpha=0.7) +
+  geom_point(data = graph1_1, aes(x = YM, y = CUM_RATE_K200, color = "Kospi 200"), shape = 16, size = 2,alpha=0.7) +
+  geom_bar(data = graph1_3, aes(x = YM, y = REVENUE_DIFF * 3),
+           stat = "identity", alpha = 0.5, fill = "gray") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  scale_y_continuous(limits = c(-30, 50), breaks = seq(-30, 50, 10), labels = scales::number_format(accuracy = 0.1),
+                     sec.axis = sec_axis(~ . / 3, name = "Overperform (100M)", breaks = c(-10, -5, 0, 5, 10), labels = c("-10", "-5", "0", "5", "10"))) +
+  scale_color_manual(values = c("Vol-adj. Weekly" = "red", "5% OTM Monthly" = "blue", "Kospi 200" = "Green")) +
+  labs(x = NULL, y = "Cumulative Return (%)", color = "") +
+  theme_minimal() +
+  theme(legend.position = c(0.4, 0.93), legend.direction = "horizontal")
+
+graph2=ggplot() +
+  geom_line(data = graph2_1, aes(x = YM, y = CUM_RATE, color = "Vol-adj. Weekly"), size = 1) +
+  geom_point(data = graph2_1, aes(x = YM, y = CUM_RATE, color = "Vol-adj. Weekly"), shape = 16, size = 2) +
+  geom_line(data = graph2_2, aes(x = YM, y = CUM_RATE, color = "5% OTM Monthly"), size = 1) +
+  geom_point(data = graph2_2, aes(x = YM, y = CUM_RATE, color = "5% OTM Monthly"), shape = 16, size = 2) +
+  geom_line(data = graph2_1, aes(x = YM, y = CUM_RATE_K200, color = "Kospi 200"), size = 1, alpha=0.7) +
+  geom_point(data = graph2_1, aes(x = YM, y = CUM_RATE_K200, color = "Kospi 200"), shape = 16, size = 2,alpha=0.7) +
+  geom_bar(data = graph2_3, aes(x = YM, y = REVENUE_DIFF * 3),
+           stat = "identity", alpha = 0.5, fill = "gray") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  scale_y_continuous(limits = c(-30, 20), breaks = seq(-30, 30, 10), labels = scales::number_format(accuracy = 0.1),
+                     sec.axis = sec_axis(~ . / 3, name = "Overperform (100M)", breaks = c(-10, -5, 0, 5, 10), labels = c("-10", "-5", "0", "5", "10"))) +
+  scale_color_manual(values = c("Vol-adj. Weekly" = "red", "5% OTM Monthly" = "blue", "Kospi 200" = "Green")) +
+  labs(x = NULL, y = "Cumulative Return (%)", color = "") +
+  theme_minimal() +
+  theme(legend.position = c(0.4, 0.93), legend.direction = "horizontal")
+
+graph3=ggplot() +
+  geom_line(data = graph3_1, aes(x = YM, y = Kospi200, color = "Kospi 200"), size = 1) +
+  geom_point(data = graph3_1, aes(x = YM, y = Kospi200, color = "Kospi 200"), shape = 16, size = 2) +
+  geom_bar(data = graph3_1, aes(x = YM, y = TargetVol * 7000),
+           stat = "identity", alpha = 0.7, fill = "blue") +
+  geom_hline(yintercept = 200, size=0.5, color = "black", alpha=0.5)+
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  scale_y_continuous(limits = c(0, 500), breaks = seq(100, 500, 100),
+                     sec.axis = sec_axis(~ . / 7000, name = "Strike Range(Monthly)", breaks = c(0, 0.025,0.05,0.075, 0.1), labels = c("0","5%", "10%","15%", "20%"))) +
+  scale_color_manual(values = c("Kospi 200" = "red")) +
+  labs(x = NULL, y = "Kospi 200", color = "") +
+  theme_minimal() +
+  theme(legend.position = c(0.1, 0.93), legend.direction = "horizontal")
+
+# 요약표 1 : VW포트폴리오
+table1 <- portfolio %>%
+  drop_na(PREMIUM, EXERCISE) %>%
+  mutate(YEAR = substr(BAS_DD, 1, 4),
+         CNT=1,
+         NO=if_else(EXERCISE==0,1,0)) %>%
+  group_by(YEAR) %>%
+  summarise(Expiry = sum(CNT),
+            NoExercise = round(sum(NO)/sum(CNT),2),
+            Premium = round(mean(PREMIUM)/10000,0),
+            Interest = round(mean(INTEREST)/10000,0),
+            Loss = round(mean(EXERCISE)/10000,0),
+            Revenue = round(mean(REVENUE)/10000,0),
+            Return = round(prod(1 + RATE)-1,2),
+            .groups = "drop") %>% 
+  left_join(K200_portfolio %>% group_by(YEAR) %>% summarise(Return_K200=round(prod(RATE_K200)-1,2)),
+            by="YEAR")
+
+# 요약표 2 : 일반 포트폴리오
+table2 <- portfolio2 %>%
+  drop_na(PREMIUM, EXERCISE) %>%
+  mutate(YEAR = substr(BAS_DD, 1, 4),
+         CNT=1,
+         NO=if_else(EXERCISE==0,1,0)) %>%
+  group_by(YEAR) %>%
+  summarise(Expiry = sum(CNT),
+            NoExercise = round(sum(NO)/sum(CNT),2),
+            Premium = round(mean(PREMIUM)/10000,0),
+            Interest = round(mean(INTEREST)/10000,0),
+            Loss = round(mean(EXERCISE)/10000,0),
+            Revenue = round(mean(REVENUE)/10000,0),
+            Return = round(prod(1 + RATE)-1,2),
+            .groups = "drop") %>% 
+  left_join(K200_portfolio %>% group_by(YEAR) %>% summarise(Return_K200=round(prod(RATE_K200)-1,2)),
+            by="YEAR")
+
+# 요약표 3 : 포트폴리오 변동성 비교
+Vol1 <- graph1_1 %>% group_by(YEAR) %>% summarise(Vol=round(sd(RATE)*sqrt(12),2),
+                                                  Vol_K200=round(sd(RATE_K200)*sqrt(12),2))
+Vol2 <- graph1_2 %>% group_by(YEAR) %>% summarise(Vol=round(sd(RATE)*sqrt(12),2))
+
+table3 <- table1 %>% 
+  select(YEAR,Return,Return_K200) %>% 
+  left_join(Vol1, by="YEAR") %>% 
+  mutate(Return_main=Return,
+         Vol_main=Vol) %>% 
+  select(YEAR, Return_main,Vol_main,Return_K200,Vol_K200) %>% 
+  left_join(table2 %>% 
+              select(YEAR,Return) %>% 
+              left_join(Vol2, by="YEAR") %>% 
+              mutate(Return_sub=Return,
+                     Vol_sub=Vol) %>% 
+              select(YEAR,Return_sub,Vol_sub), by="YEAR")
+```
+
+### R code 2 : 전략 검증
+
+```{r}
+#| echo: true
+#| eval: false
+#| warning: false
+#| error: false
+rm(list=ls())
+library(tidyverse)
+library(knitr)
+library(patchwork)
+setwd("homepage/study_25spring/data/")
+
+# 1. 원본데이터 준비
+options_raw <- read_csv("options_data_test.csv") %>% tibble()
+idx_raw <- read_csv("idx_data_test.csv") %>% tibble()
+mmf_raw <- read_csv("mmf_test.csv") %>% tibble()
+
+# 2-1. 데이터 전처리 : KRX openAPI 옵션데이터 전처리
+options <- options_raw %>% 
+  # K200, WK200 이외의 옵션 제외
+  filter(substr(PROD_NM,1,3)=="코스피") %>%
+  # 종가가 없는 경우 익일 기준가격(이론가격) 사용
+  mutate(PRICE = as.double(if_else(TDD_CLSPRC=="-",NXTDD_BAS_PRC,TDD_CLSPRC))) %>% 
+  drop_na(PRICE) %>% 
+  select(BAS_DD,ISU_NM,PRICE,ACC_TRDVOL) %>% 
+  separate(ISU_NM, into=c("PROD","RGHT","EXP","EXER_PRC"), sep=' ') %>%
+  mutate(EXER_PRC=as.double(EXER_PRC),
+         EXPMM=if_else(PROD=="코스피200",substr(EXP,3,6),substr(EXP,1,4)),
+         EXPWW=if_else(PROD=="코스피200",2,as.integer(substr(EXP,6,6)))) %>% 
+  filter(EXER_PRC>min(idx_raw$KOSPI200)*0.85,
+         EXER_PRC<max(idx_raw$KOSPI200)*1.15,
+         PROD!="코스피위클리M") %>% # 월요일 만기 위클리옵션 제외
+  mutate(PRIOR=as.integer(EXPMM)*10+EXPWW) # 만기가 짧은 순으로 우선순위 부여
+
+# 2-2. 데이터 전처리 : 옵션 만기일 데이터 생성
+target_date <- options %>% 
+  distinct(.,BAS_DD, PRIOR) %>% 
+  arrange(PRIOR, desc(BAS_DD)) %>% 
+  group_by(PRIOR) %>% 
+  slice(1) %>% 
+  ungroup() %>% 
+  distinct(BAS_DD) %>% 
+  arrange(desc(BAS_DD)) %>% 
+  filter(BAS_DD<20250411)
+
+# 2-3. 데이터 전처리 : KRX 정보데이터시스템 K200 및 V-K200지수 전처리
+idx_data <- idx_raw %>%
+  arrange(BAS_DD) %>% 
+  mutate(LAG_K200=lag(KOSPI200),
+         LAG_VK200=lag(VKOSPI200))
+
+K200_portfolio=idx_data %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  mutate(RATE=(KOSPI200-LAG_K200)/LAG_K200,
+         YEAR = substr(BAS_DD, 1, 4),
+         YM = ym(substr(BAS_DD, 1, 6))) %>%
+  group_by(YEAR) %>%
+  filter(is.na(RATE)==FALSE) %>% 
+  summarise(RATE_K200 = prod(1 + RATE),
+            MMF = mean(MMF)/100,
+            .groups = "drop") %>%
+  ungroup()
+
+# 3-1. 포트폴리오 구성 : VW양매도 포트폴리오 기초정보 생성
+target_info <- target_date %>% 
+  left_join(options, by="BAS_DD") %>% 
+  distinct(BAS_DD,PRIOR) %>% 
+  arrange(desc(BAS_DD),PRIOR) %>% 
+  group_by(BAS_DD) %>% 
+  # 만기가 도래하는 옵션을 제외하고 우선순위가 높은 옵션 선택
+  slice(2) %>% 
+  ungroup() %>% 
+  arrange(desc(BAS_DD)) %>% 
+  left_join(idx_data, by="BAS_DD") %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  # 옵션 보유기간 및 단기금리(MMF) 계산
+  mutate(DIFF_DAY=as.integer(ymd(lag(BAS_DD))-ymd(BAS_DD)),
+         MMF=MMF*0.01) %>% 
+  # 옵션 보유기간에 해당하는 시장기대변동성 계산(V-K200활용)
+  mutate(VOL=LAG_VK200*sqrt(DIFF_DAY)/sqrt(365)/100) %>%
+  # 변동성에 따른 옵션 행사가격 상단(2.5단위 올림) 및 하단(2.5단위 내림) 계산
+  mutate(TARGET_C_K=ceiling(KOSPI200*(1+VOL)*0.4)/0.4,
+         TARGET_P_K=floor(KOSPI200*(1-VOL)*0.4)/0.4) %>% 
+  # drop_na(DIFF_DAY) %>% 
+  select(BAS_DD,VOL,DIFF_DAY,MMF,KOSPI200,LAG_VK200,PRIOR,TARGET_C_K,TARGET_P_K)
+
+# 3-2. 포트폴리오 구성 : VW양매도 포트폴리오 거래대상 옵션 정보 생성
+target_options <- target_info %>% 
+  select(BAS_DD, PRIOR, TARGET_C_K, TARGET_P_K) %>% 
+  pivot_longer(cols=c("TARGET_C_K","TARGET_P_K"),names_to = "GRP", values_to = "EXER_PRC") %>% 
+  mutate(RGHT=substr(GRP,8,8)) %>% 
+  left_join(options,by=c("BAS_DD","PRIOR","RGHT","EXER_PRC")) %>%
+  select(BAS_DD,GRP,PRICE,ACC_TRDVOL) %>% 
+  pivot_wider(names_from = "GRP", values_from = c("PRICE","ACC_TRDVOL"))
+
+# 원금 100억원 가정
+cash = 10000*10000*100
+
+# 4. 포트폴리오 구현 : VW양매도 전략을 구현하여 일자별 손익 계산
+portfolio <- target_info %>% 
+  left_join(target_options,by="BAS_DD") %>% 
+  arrange(BAS_DD) %>% 
+  # 원금에 따른 옵션 매도수량 계산
+  mutate(SELL_AMT=cash/250000/KOSPI200) %>% 
+  # 옵션 프리미엄(매도수익)) 계산
+  mutate(PREMIUM=SELL_AMT*(PRICE_TARGET_C_K+PRICE_TARGET_P_K)*250000) %>% 
+  # 원금 및 프리미엄의 MMF 이자수익 및 권리행사손실 계산
+  mutate(INTEREST=(cash+replace_na(PREMIUM,0))*MMF*DIFF_DAY/365,
+         EXERCISE=(if_else(lead(KOSPI200)-TARGET_C_K>0,lead(KOSPI200)-TARGET_C_K,0)+
+                     if_else(TARGET_P_K-lead(KOSPI200)>0,TARGET_P_K-lead(KOSPI200),0))*250000*SELL_AMT) %>% 
+  # 주단위 포트폴리오 손익 계산(원금 100억 가정, 당일 투자시 다음주 실현손익을 의미)
+  mutate(REVENUE=PREMIUM+INTEREST-EXERCISE) %>% 
+  # 거래대상 옵션이 상장되어있지 않은 경우, MMF수익만 고려
+  mutate(REVENUE=if_else(is.na(REVENUE),INTEREST,REVENUE)) %>% 
+  mutate(RATE=REVENUE/cash,
+         Group="Vol-adj. Weekly")  # 주단위 포트폴리오 수익률
+
+# 5. 비교군 포트폴리오 생성 : 월별 5% OTM 양매도 전략
+options2 <- options %>% 
+  filter(PROD=="코스피200")
+
+# 옵션 만기일(매달) 생성
+target_date2 <- options2 %>% 
+  distinct(.,BAS_DD, PRIOR) %>% 
+  arrange(PRIOR, desc(BAS_DD)) %>% 
+  group_by(PRIOR) %>% 
+  slice(1) %>% 
+  ungroup() %>% 
+  distinct(BAS_DD) %>% 
+  arrange(desc(BAS_DD)) %>% 
+  filter(BAS_DD<20250411)
+
+# 일반 양매도 포트폴리오 기본 정보 생성
+target_info2 <- target_date2 %>% 
+  left_join(options2, by="BAS_DD") %>% 
+  distinct(BAS_DD,PRIOR) %>% 
+  arrange(desc(BAS_DD),PRIOR) %>% 
+  group_by(BAS_DD) %>% 
+  # 만기가 도래하는 옵션을 제외하고 우선순위가 높은 옵션 선택
+  slice(2) %>% 
+  ungroup() %>% 
+  arrange(desc(BAS_DD)) %>% 
+  left_join(idx_data, by="BAS_DD") %>% 
+  left_join(mmf_raw, by="BAS_DD") %>% 
+  # 옵션 보유기간 및 단기금리(MMF) 계산
+  mutate(DIFF_DAY=as.integer(ymd(lag(BAS_DD))-ymd(BAS_DD)),
+         MMF=MMF*0.01,
+         VOL=0.05) %>%
+  # 변동성에 따른 옵션 행사가격 상단(2.5단위 올림) 및 하단(2.5단위 내림) 계산
+  mutate(TARGET_C_K=ceiling(KOSPI200*(1+VOL)*0.4)/0.4,
+         TARGET_P_K=floor(KOSPI200*(1-VOL)*0.4)/0.4) %>% 
+  mutate(DIFF_DAY=if_else(is.na(DIFF_DAY),28,DIFF_DAY)) %>% 
+  select(BAS_DD,VOL,DIFF_DAY,MMF,KOSPI200,LAG_VK200,PRIOR,TARGET_C_K,TARGET_P_K)
+
+# 일반 양매도 포트폴리오 거래대상 옵션
+target_options2 <- target_info2 %>% 
+  select(BAS_DD, PRIOR, TARGET_C_K, TARGET_P_K) %>% 
+  pivot_longer(cols=c("TARGET_C_K","TARGET_P_K"),names_to = "GRP", values_to = "EXER_PRC") %>% 
+  mutate(RGHT=substr(GRP,8,8)) %>% 
+  left_join(options2,by=c("BAS_DD","PRIOR","RGHT","EXER_PRC")) %>%
+  select(BAS_DD,GRP,PRICE,ACC_TRDVOL) %>% 
+  pivot_wider(names_from = "GRP", values_from = c("PRICE","ACC_TRDVOL"))
+
+# 일반 양매도 포트폴리오 구현
+portfolio2 <- target_info2 %>% 
+  left_join(target_options2,by="BAS_DD") %>% 
+  arrange(BAS_DD) %>% 
+  # 원금에 따른 옵션 매도수량 계산
+  mutate(SELL_AMT=cash/250000/KOSPI200) %>% 
+  # 옵션 프리미엄(매도수익)) 계산
+  mutate(PREMIUM=SELL_AMT*(PRICE_TARGET_C_K+PRICE_TARGET_P_K)*250000) %>% 
+  # 원금 및 프리미엄의 MMF 이자수익 및 권리행사손실 계산
+  mutate(INTEREST=(cash+replace_na(PREMIUM,0))*MMF*DIFF_DAY/365,
+         EXERCISE=(if_else(lead(KOSPI200)-TARGET_C_K>0,lead(KOSPI200)-TARGET_C_K,0)+
+                     if_else(TARGET_P_K-lead(KOSPI200)>0,TARGET_P_K-lead(KOSPI200),0))*250000*SELL_AMT) %>% 
+  mutate(EXERCISE=if_else(is.na(EXERCISE),0,EXERCISE)) %>% 
+  # 주단위 포트폴리오 손익 계산(원금 100억 가정, 당일 투자시 다음주 실현손익을 의미)
+  mutate(REVENUE=PREMIUM+INTEREST-EXERCISE) %>% 
+  # 거래대상 옵션이 상장되어있지 않은 경우, MMF수익만 고려
+  mutate(REVENUE=if_else(is.na(REVENUE),INTEREST,REVENUE)) %>% 
+  mutate(RATE=REVENUE/cash,
+         Group="Monthly") # 주단위 포트폴리오 수익률
+
+portfolio <- portfolio %>% filter(BAS_DD!=20250410)
+portfolio2 <- portfolio2 %>% filter(BAS_DD!=20250410)
+portfolio3 <- portfolio %>% 
+  summarise(across(where(is.numeric), sum)) %>% 
+  mutate(Group="Vol-adj. Weekly Sum")
+  
+
+# 요약표 4 : 검증 자료
+table4 <- portfolio %>%
+  union_all(portfolio2) %>%
+  union_all(portfolio3) %>% 
+  group_by(BAS_DD, Group) %>%
+  summarise(Premium = round(mean(PREMIUM)/10000,0),
+            Interest = round(mean(INTEREST)/10000,0),
+            Loss = round(mean(EXERCISE)/10000,0),
+            Revenue = round(mean(REVENUE)/10000,0),
+            Return = round(prod(1 + RATE)-1,2),
+            .groups = "drop")
+
+# 그래프 4 : 검증기간중 코스피200지수 추이
+graph4 <- ggplot(idx_raw, aes(x = ymd(BAS_DD))) +
+  geom_line(aes(y = KOSPI200, color = "KOSPI200"), size = 1.2) +
+  geom_line(aes(y = (VKOSPI200 - 19) / 26 * 60 + 300, color = "VKOSPI200"), size = 1.2) +
+  geom_vline(xintercept = ymd(c("20250313", "20250320", "20250327", "20250403","20250410")),
+             linetype = "dotted", color = "grey40") +
+  scale_y_continuous(name = "KOSPI200",limits = c(300, 360),
+                     sec.axis = sec_axis(
+                       ~ (.-300) / 60 * 26 + 19, name = "VKOSPI200")) +
+  scale_color_manual(values = c("KOSPI200" = "blue", "VKOSPI200" = "red"),
+                     guide = guide_legend(direction = "horizontal")) +
+  labs(title = "Kospi200 & V-Kospi200 indices",x = NULL,color = NULL) +
+  theme_minimal() +
+  scale_x_date(date_breaks = "3 days", date_labels = "%m-%d") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(0.5, 0.95))
+```
