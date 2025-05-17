@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.550">
+<meta name="generator" content="quarto-1.4.553">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -459,7 +459,7 @@ Isolation Forest 검증(T-SNE 적용) 및 최종 데이터 구성
 <p><strong>2단계: 최적 모델 미세 조정</strong> - 1단계에서 찾은 최적 하이퍼파라미터에 낮은 학습률(0.01)과 높은 n_estimators(10000) 적용 - 조기종료를 적용(50)하여 최적의 트리 개수 결정하고, 전체 훈련/검증 데이터를 사용하여 모델 학습</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="plots/learning_curve.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:70.0%"></p>
+<p><img src="plots/learning_curve.png" class="img-fluid figure-img" style="width:70.0%"></p>
 <figcaption>2단계 접근법의 최종 모델 학습곡선</figcaption>
 </figure>
 </div>
@@ -530,7 +530,7 @@ Isolation Forest 검증(T-SNE 적용) 및 최종 데이터 구성
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="plots/confusion_matrix.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+<p><img src="plots/confusion_matrix.png" class="img-fluid figure-img" style="width:80.0%"></p>
 <figcaption>XGBoost Confusion Matrix</figcaption>
 </figure>
 </div>
@@ -538,7 +538,7 @@ Isolation Forest 검증(T-SNE 적용) 및 최종 데이터 구성
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="plots/precision_recall_curve.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+<p><img src="plots/precision_recall_curve.png" class="img-fluid figure-img" style="width:80.0%"></p>
 <figcaption>XGBoost PRCurve</figcaption>
 </figure>
 </div>
@@ -711,6 +711,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   if (showAllCode) {
     showAllCode.addEventListener("click", toggleCodeHandler(true));
   }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -745,7 +763,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
