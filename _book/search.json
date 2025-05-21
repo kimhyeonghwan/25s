@@ -206,5 +206,49 @@
       "금융윤리와 사회책임('25 봄)",
       "금융윤리와 사회책임"
     ]
+  },
+  {
+    "objectID": "장외파생_과제.html",
+    "href": "장외파생_과제.html",
+    "title": "장외파생상품 기초실무 과제",
+    "section": "",
+    "text": "평가 상품 개요\n이번 과제에서 평가해볼 장외파생상품은 S&P500 기반의 ELB입니다.\nLong put + 20% Knock-out 형태로, 원금보장형 payoff를 가지고 있습니다.\n세부 사항은 아래 사진과 같습니다.\n이는 배리어옵션의 한 종류로, 만기까지 한번이라도 배리어(20%) 밑으로 하락하는 경우가 존재하면 옵션 권리가 사라지고(Down-and-Out), 대신 6%의 rebate를 지급하는 구조입니다.",
+    "crumbs": [
+      "장외파생상품 기초 실무('25 봄)",
+      "장외파생상품 기초실무 과제"
+    ]
+  },
+  {
+    "objectID": "장외파생_과제.html#mcs를-이용한-평가",
+    "href": "장외파생_과제.html#mcs를-이용한-평가",
+    "title": "장외파생상품 기초실무 과제",
+    "section": "MCS를 이용한 평가",
+    "text": "MCS를 이용한 평가\n평가 상품을 최초기준가격평가일(’25.3.19)을 기준으로 pricing할 예정이며, 배리어옵션 평가 parameter는 아래와 같이 정리하였습니다.\n\n\\(S_0\\) : S&P500지수의 ’25.3.19일 종가 (5,675.29pt)\n\\(K\\) : Down-and-out put options 행사가격(=\\(S_0\\times 100\\%\\))\n\\(B\\) : Down-and-out put options 배리어가격(=\\(S_0\\times 80\\%\\))\n\\(r\\) : 무위험이자율(=1year Term-SOFR, 4.08507%)\n\\(d\\) : S&P500 배당수익률(24년말 기준, 1.27%)\n\\(T_1\\) : 잔존만기(=1)\n\\(T_2\\) : 배리어옵션 평가대상만기(=\\(248/251\\))\n\\(n\\) : 몬테카를로 시뮬레이션 시행횟수\n\\(m\\) : 시뮬레이션 경로 분할 갯수(일별, 248)\n\n\n\n\n\n\n\n파라미터 결정 근거\n\n\n\n상품 개요에서 확인 가능한 정보로 \\(S_0,K,B,T_1\\) 결정이 가능하며,\n- 무위험이자율 : 미국에서는 SOFR, USD-libor, FFR 등이 널리 사용됩니다. 본 분석에서는 1년 만기의 기간구조를 반영하기위해 CME SOFR 선물을 활용하여 생성한 1year term SOFR를 선정하였습니다.\n- S&P500 배당수익률 : 현금배당을 연환산한 값을 사용하였으며, 과거 배당이 유지된다는 가정 하에 '24년값을 채택하였습니다.\n- 평가대상만기 : 명목 만기는 1년이나, 만기평가일에 옵션 payoff가 결정되므로, 3거래일을 차감한 값을 활용하였습니다.\n- 경로 분할 갯수 : Lookback period의 간격이 1일이므로 거래일수로 분할하였습니다.\n거래일은 NYSE를 기준으로 산출하였습니다.\n\nimport pandas_market_calendars as mcal\n\nstrt = '2025-03-20'; end='2026-03-16'; exp='2026-03-19'\nnyse = mcal.get_calendar('NYSE')\ntrd = nyse.valid_days(start_date=strt, end_date=end)\nexp = nyse.valid_days(start_date=strt, end_date=exp)\nprint(len(trd),len(exp))\n\n248 251",
+    "crumbs": [
+      "장외파생상품 기초 실무('25 봄)",
+      "장외파생상품 기초실무 과제"
+    ]
+  },
+  {
+    "objectID": "장외파생_과제.html#평가",
+    "href": "장외파생_과제.html#평가",
+    "title": "장외파생상품 기초실무 과제",
+    "section": "평가",
+    "text": "평가\n\n평가 개요\n평가는 몬테카를로 시뮬레이션을 이용할 계획이며, Numerix pricer와 동일한 2025-4-29일을 기준으로 pricing하도록 하겠습니다.\n배리어옵션 평가를 위한 parameter는 아래와 같이 정리하였습니다.\n\n\\(S_0\\) : S&P500지수의 최초기준가격평가일(’25.3.19) 종가 (5,675.29pt)\n\\(S_1\\) : S&P500지수의 평가일(’25.4.29) 종가 (5,560.83pt)\n\\(K\\) : Down-and-out put options 행사가격(=\\(S_0\\times 100\\%\\))\n\\(B\\) : Down-and-out put options 배리어가격(=\\(S_0\\times 80\\%\\))\n\\(r\\) : 무위험이자율(=3% 가정)\n\\(q\\) : S&P500 배당수익률(=0% 가정정)\n\\(\\sigma\\) : 기초자산 변동성(=20% 가정)\n\\(T_1\\) : 잔존만기(=324/365)\n\\(T_2\\) : 배리어옵션 평가대상만기(=321/365)\n\\(n\\) : 몬테카를로 시뮬레이션 시행횟수\n\\(m\\) : 시뮬레이션 경로 분할 갯수(거래일별, 220)\n\\(rebate\\) : 배리어옵션 Knock-out 시 지급하는 쿠폰(=6%)\n\n\n\n\n\n\n\n파라미터 결정 근거\n\n\n\n상품 평가를 위한 파라미터의 산정 근거는 아래와 같습니다.\n- 기초자산가격, 행사가격, 배리어가격, 만기 등 : 상품 개요에서 확인\n\n- 무위험이자율 : 미국에서는 SOFR, USD-libor, FFR 등이 널리 사용되며, Swap rate 등을 활용해 term-structure를 구성하는 것이 가장 정밀한 방법입니다. 분석의 단순화를 위해 **3%를 가정**하였습니다.\n\n- S&P500 배당수익률 : 과거 배당이 유지된다고 가정하거나, 별도의 모델링을 통해 기간구조를 구성하는 것이 가장 정밀한 방법입니다. 분석의 단순화를 위해 **배당이 없다고 가정**하였습니다.\n\n- 평가대상만기 : 명목 만기는 1년이나, 만기평가일에 옵션 payoff가 결정되므로, 3거래일을 차감한 값을 활용하였습니다.\n\n- 기초자산 변동성 : 시장가격을 활용한 내재변동성을 이용하였으며, Local Vol 등을 통해 Surface를 구성하여 시뮬레이션 하는 것이 가장 정밀한 방법입니다. 다만, 분석의 단순화를 위해 **20%를 가정**하였습니다.\n- 경로 분할 갯수 : Lookback period의 간격이 1일이므로 거래일수로 분할하였습니다.\n거래일은 NYSE를 기준으로 산출하였고, 데이터는 yahoo finance, cme, cboe를 참고하였습니다.\n\nimport pandas_market_calendars as mcal\nfrom datetime import date\n\nexp = date(2026, 3, 19)\nstrt = date(2025, 4, 29)\nexptime = (exp - strt).days\n\nstrt = '2025-04-30'; end='2026-03-16';\nnyse = mcal.get_calendar('NYSE')\ntimesteps = nyse.valid_days(start_date=strt, end_date=end)\n\nprint(exptime, len(timesteps))\n\n324 220\n\n\n\n\n\n\n평가 알고리즘\n기초자산인 S&P500 지수가 GBM을 따른다는 가정 하에 정규난수를 이용하여 만기평가일까지의 주가흐름을 시뮬레이션할 계획이며, 알고리즘은 아래와 같습니다.\n\n현재 주가(\\(S_0\\))와 만기(\\(T_2\\)), 변동성(\\(\\sigma\\)), 기대수익률(\\(\\mu=r-d\\))를 통해 GBM을 구성하고, Euler’s discretization을 통해 248거래일마다 종가를 생성\n\n먼저, 평가대상만기일의 종가를 n개 생성(Stratified sampling, Moment matching, Antithetic variate를 활용하여 균질한 분포를 구현)\n각 n개의 종가마다, 그 경로의 247(총 (m-1)*n)개의 난수를 생성(Antithetic variate 적용)하고, brownian bridge 방법을 통해 오일러 이산화를 구현\n\n각 경로마다 Knock 여부와 내재가치를 고려하여 배리어옵션의 payoff와 npv를 결정\n\nKnock-out 발생 : 명목금액의 6%의 rebate를 지급받음\nKnock-out 미발생 : 평가만기일 종가에 따라 풋옵션 내재가치를 지급받음\n각 payoff를 잔존만기(\\(T_1\\))에 대해 할인하여 npv를 산출\n\n이에 따라 산출된 npv를 산술평균을 통해 배리어옵션(ELB)의 공정가치를 산출\n\n\n\n알고리즘 구현 (Python code)\n알고리즘을 Python 코드로 구현하였으며, Down-out Put option 가격과 GBM을 활용한 기초자산의 경로를 반환하는 함수로 작성하였습니다.\n\nimport numpy as np\nimport scipy.stats as sst\n\ndef DownAndOutPut_Price(s, k, r, q, t, sigma, n, b, m, rebate):\n    # Set parameters\n    dt = t/m\n    dts = np.arange(dt, t+dt, dt)\n\n    # (1) Stratified sampling, z_t makes price at T & z makes brownian bridge\n    z_t = sst.norm.ppf((np.arange(n) + np.random.uniform(0,1,n)) / n)\n    z = np.random.randn(n,m)\n    # (2) Moment matching in z_t\n    z_t = np.where(n&gt;=100, (z_t - z_t.mean()) / z_t.std(ddof=1), z_t - z_t.mean())\n    # (3) Antithetic variate\n    z_t, z = np.concatenate([z_t, -z_t], axis=0), np.concatenate([z, -z], axis=0)\n\n    # Generate underlying paths using brownian bridge\n    w_t, w = z_t * np.sqrt(t), z.cumsum(axis=1) * np.sqrt(dt) # winner process\n    bridge = dts * ((w_t- w[:,-1]).reshape(len(w),1) + w / dts) # brownian bridge\n    paths = s*np.exp((r-q-0.5*sigma**2)*dts + sigma*bridge) # underlying price path\n    # Determine whether barrier touch or not (exists payoff or not)\n    knock = paths.min(axis=1) &lt; b # knock-out = 1 else 0\n    barrier_flag = ~knock\n\n    # Caculate options payoff\n    plain_npv = np.maximum(k-paths[:,-1], 0) * np.exp(-r*t)\n    barrier_npv = barrier_flag * plain_npv + knock * rebate * np.exp(-r*t)\n    barrier_price = barrier_npv.mean()\n\n    return barrier_price, paths",
+    "crumbs": [
+      "장외파생상품 기초 실무('25 봄)",
+      "장외파생상품 기초실무 과제"
+    ]
+  },
+  {
+    "objectID": "장외파생_과제.html#평가-결과-및-비교numerix-pricer",
+    "href": "장외파생_과제.html#평가-결과-및-비교numerix-pricer",
+    "title": "장외파생상품 기초실무 과제",
+    "section": "평가 결과 및 비교(Numerix Pricer)",
+    "text": "평가 결과 및 비교(Numerix Pricer)\n\n배리어옵션 가격 및 기초자산 경로\n상술한 2025-4-29일의 기준 파라미터를 이용하여 배리어옵션의 가격을 평가해보았습니다.\n가격은 명목금액 10,000원을 기준으로 약 365원이며, 수익률로 환산할 때 약 3.65%입니다.\n시뮬레이션 횟수는 10만번 기준으로, 난수에 따라 편차가 약 1~2원 존재하였습니다.\n\ns0 = 5675.29\ns1 = 5560.83\nk = s0\nr = 0.03\nq = 0\nb = 0.8 * s0\nt1 = exptime / 365\nt2 = (exptime-3) / 365\nsigma = 0.2\nn = 100000\nm = len(timesteps)\nrebate = 0.06 * s0\nnotional = 10000\nnxprice = 366.8977875\n\nprice, GBMpath = DownAndOutPut_Price(s1, k, r, q, t2, sigma, n, b, m, rebate)\nprice = price * np.exp(r*(t2-t1)) / s0 * notional\nprint(price)\n\n364.26567636897414\n\n\n시뮬레이션에 이용된 기초자산의 경로를 시각화한 결과입니다.\n계층화, 표준화 등 분산감소기법이 잘 적용되어 만기시점의 Lognormal dist. 형태가 잘 나타난 것을 볼 수 있으며, 시뮬레이션 중 배리어가격 밑으로 하락한 경우가 발생한 Knock-out의 비율은 약 22.65%로 나타났습니다.\n\n\n\n\n\n\n\n\n\n\n\nNumerix Pricer와 비교\n유사한 조건의 Numerix pricer를 이용한 배리어옵션 가격은 약 366.9원(3.67%)로 산출되었습니다.",
+    "crumbs": [
+      "장외파생상품 기초 실무('25 봄)",
+      "장외파생상품 기초실무 과제"
+    ]
   }
 ]

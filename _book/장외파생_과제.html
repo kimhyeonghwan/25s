@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.550">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>KAIST MFE, 2025 Spring - 장외파생상품 기초실무 과제</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./금융윤리1.html" rel="next">
+<link href="./사례_과제.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./장외파생_과제.html">장외파생상품 기초 실무(’25 봄)</a></li><li class="breadcrumb-item"><a href="./장외파생_과제.html">장외파생상품 기초실무 과제</a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">KAIST MFE, 2025 Spring</a> 
+        <div class="sidebar-tools-main">
+    <a href="./KAIST-MFE,-2025-Spring.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome!</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">머신러닝2(’25 봄)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./빅데이터1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">빅데이터와 금융자료 분석 CH1</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./빅데이터_과제.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">빅데이터와 금융자료 분석 기말대체과제</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./빅데이터_팀프로젝트_팀4_보고서.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">빅데이터와 금융자료분석 프로젝트 (Team 4)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">알고리즘 거래전략(’25 봄)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./알고리즘1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">알고리즘 거래전략과 고빈도 금융</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">사례로 보는 금융공학(’25 봄)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./사례1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">사례로 보는 금융공학 실무</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./사례_과제.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">코스피200 변동성 조정 위클리 양매도 전략</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">장외파생상품 기초 실무(’25 봄)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./장외파생_과제.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">장외파생상품 기초실무 과제</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text">금융윤리와 사회책임(’25 봄)</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./금융윤리1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">금융윤리와 사회책임</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#평가-상품-개요" id="toc-평가-상품-개요" class="nav-link active" data-scroll-target="#평가-상품-개요">평가 상품 개요</a></li>
+  <li><a href="#평가" id="toc-평가" class="nav-link" data-scroll-target="#평가">평가</a>
+  <ul class="collapse">
+  <li><a href="#평가-개요" id="toc-평가-개요" class="nav-link" data-scroll-target="#평가-개요">평가 개요</a></li>
+  <li><a href="#평가-알고리즘" id="toc-평가-알고리즘" class="nav-link" data-scroll-target="#평가-알고리즘">평가 알고리즘</a></li>
+  <li><a href="#알고리즘-구현-python-code" id="toc-알고리즘-구현-python-code" class="nav-link" data-scroll-target="#알고리즘-구현-python-code">알고리즘 구현 (Python code)</a></li>
+  </ul></li>
+  <li><a href="#평가-결과-및-비교numerix-pricer" id="toc-평가-결과-및-비교numerix-pricer" class="nav-link" data-scroll-target="#평가-결과-및-비교numerix-pricer">평가 결과 및 비교(Numerix Pricer)</a>
+  <ul class="collapse">
+  <li><a href="#배리어옵션-가격-및-기초자산-경로" id="toc-배리어옵션-가격-및-기초자산-경로" class="nav-link" data-scroll-target="#배리어옵션-가격-및-기초자산-경로">배리어옵션 가격 및 기초자산 경로</a></li>
+  <li><a href="#numerix-pricer와-비교" id="toc-numerix-pricer와-비교" class="nav-link" data-scroll-target="#numerix-pricer와-비교">Numerix Pricer와 비교</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./장외파생_과제.html">장외파생상품 기초 실무(’25 봄)</a></li><li class="breadcrumb-item"><a href="./장외파생_과제.html">장외파생상품 기초실무 과제</a></li></ol></nav>
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">장외파생상품 기초실무 과제</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>20249132 김형환</p>
+<section id="평가-상품-개요" class="level2">
+<h2 class="anchored" data-anchor-id="평가-상품-개요">평가 상품 개요</h2>
+<p>이번 과제에서 평가해볼 장외파생상품은 S&amp;P500 기반의 ELB입니다.</p>
+<p><strong>Long put + 20% Knock-out</strong> 형태로, 원금보장형 payoff를 가지고 있습니다.</p>
+<p>세부 사항은 아래 사진과 같습니다.</p>
+<p><img src="image/elb1.png" class="img-fluid"></p>
+<p><img src="image/elb2.png" class="img-fluid"></p>
+<p><img src="image/elb3.png" class="img-fluid"></p>
+<p>이는 <strong>배리어옵션</strong>의 한 종류로, 만기까지 한번이라도 배리어(20%) 밑으로 하락하는 경우가 존재하면 옵션 권리가 사라지고(<strong>Down-and-Out</strong>), 대신 6%의 rebate를 지급하는 구조입니다.</p>
+</section>
+<section id="평가" class="level2">
+<h2 class="anchored" data-anchor-id="평가">평가</h2>
+<section id="평가-개요" class="level3">
+<h3 class="anchored" data-anchor-id="평가-개요">평가 개요</h3>
+<p>평가는 몬테카를로 시뮬레이션을 이용할 계획이며, Numerix pricer와 동일한 2025-4-29일을 기준으로 pricing하도록 하겠습니다.</p>
+<p>배리어옵션 평가를 위한 parameter는 아래와 같이 정리하였습니다.</p>
+<ul>
+<li><span class="math inline">\(S_0\)</span> : S&amp;P500지수의 최초기준가격평가일(’25.3.19) 종가 (5,675.29pt)</li>
+<li><span class="math inline">\(S_1\)</span> : S&amp;P500지수의 평가일(’25.4.29) 종가 (5,560.83pt)</li>
+<li><span class="math inline">\(K\)</span> : Down-and-out put options 행사가격(=<span class="math inline">\(S_0\times 100\%\)</span>)</li>
+<li><span class="math inline">\(B\)</span> : Down-and-out put options 배리어가격(=<span class="math inline">\(S_0\times 80\%\)</span>)</li>
+<li><span class="math inline">\(r\)</span> : 무위험이자율(=3% 가정)</li>
+<li><span class="math inline">\(q\)</span> : S&amp;P500 배당수익률(=0% 가정정)</li>
+<li><span class="math inline">\(\sigma\)</span> : 기초자산 변동성(=20% 가정)</li>
+<li><span class="math inline">\(T_1\)</span> : 잔존만기(=324/365)</li>
+<li><span class="math inline">\(T_2\)</span> : 배리어옵션 평가대상만기(=321/365)</li>
+<li><span class="math inline">\(n\)</span> : 몬테카를로 시뮬레이션 시행횟수</li>
+<li><span class="math inline">\(m\)</span> : 시뮬레이션 경로 분할 갯수(거래일별, 220)</li>
+<li><span class="math inline">\(rebate\)</span> : 배리어옵션 Knock-out 시 지급하는 쿠폰(=6%)</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled" title="파라미터 결정 근거">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+파라미터 결정 근거
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>상품 평가를 위한 파라미터의 산정 근거는 아래와 같습니다.</p>
+<pre><code>- 기초자산가격, 행사가격, 배리어가격, 만기 등 : 상품 개요에서 확인
+
+- 무위험이자율 : 미국에서는 SOFR, USD-libor, FFR 등이 널리 사용되며, Swap rate 등을 활용해 term-structure를 구성하는 것이 가장 정밀한 방법입니다. 분석의 단순화를 위해 **3%를 가정**하였습니다.
+
+- S&amp;P500 배당수익률 : 과거 배당이 유지된다고 가정하거나, 별도의 모델링을 통해 기간구조를 구성하는 것이 가장 정밀한 방법입니다. 분석의 단순화를 위해 **배당이 없다고 가정**하였습니다.
+
+- 평가대상만기 : 명목 만기는 1년이나, 만기평가일에 옵션 payoff가 결정되므로, 3거래일을 차감한 값을 활용하였습니다.
+
+- 기초자산 변동성 : 시장가격을 활용한 내재변동성을 이용하였으며, Local Vol 등을 통해 Surface를 구성하여 시뮬레이션 하는 것이 가장 정밀한 방법입니다. 다만, 분석의 단순화를 위해 **20%를 가정**하였습니다.
+- 경로 분할 갯수 : Lookback period의 간격이 1일이므로 거래일수로 분할하였습니다.</code></pre>
+<p>거래일은 NYSE를 기준으로 산출하였고, 데이터는 <code>yahoo finance</code>, <code>cme</code>, <code>cboe</code>를 참고하였습니다.</p>
+<div id="1cd949ab" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas_market_calendars <span class="im">as</span> mcal</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> date</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>exp <span class="op">=</span> date(<span class="dv">2026</span>, <span class="dv">3</span>, <span class="dv">19</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>strt <span class="op">=</span> date(<span class="dv">2025</span>, <span class="dv">4</span>, <span class="dv">29</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>exptime <span class="op">=</span> (exp <span class="op">-</span> strt).days</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>strt <span class="op">=</span> <span class="st">'2025-04-30'</span><span class="op">;</span> end<span class="op">=</span><span class="st">'2026-03-16'</span><span class="op">;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>nyse <span class="op">=</span> mcal.get_calendar(<span class="st">'NYSE'</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>timesteps <span class="op">=</span> nyse.valid_days(start_date<span class="op">=</span>strt, end_date<span class="op">=</span>end)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(exptime, <span class="bu">len</span>(timesteps))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>324 220</code></pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="평가-알고리즘" class="level3">
+<h3 class="anchored" data-anchor-id="평가-알고리즘">평가 알고리즘</h3>
+<p>기초자산인 <strong>S&amp;P500 지수가 GBM을 따른다는 가정</strong> 하에 정규난수를 이용하여 만기평가일까지의 주가흐름을 시뮬레이션할 계획이며, 알고리즘은 아래와 같습니다.</p>
+<ol type="1">
+<li>현재 주가(<span class="math inline">\(S_0\)</span>)와 만기(<span class="math inline">\(T_2\)</span>), 변동성(<span class="math inline">\(\sigma\)</span>), 기대수익률(<span class="math inline">\(\mu=r-d\)</span>)를 통해 GBM을 구성하고, Euler’s discretization을 통해 248거래일마다 종가를 생성
+<ul>
+<li>먼저, 평가대상만기일의 종가를 n개 생성(Stratified sampling, Moment matching, Antithetic variate를 활용하여 균질한 분포를 구현)</li>
+<li>각 n개의 종가마다, 그 경로의 247(총 (m-1)*n)개의 난수를 생성(Antithetic variate 적용)하고, brownian bridge 방법을 통해 오일러 이산화를 구현</li>
+</ul></li>
+<li>각 경로마다 Knock 여부와 내재가치를 고려하여 배리어옵션의 payoff와 npv를 결정
+<ul>
+<li>Knock-out 발생 : 명목금액의 6%의 rebate를 지급받음</li>
+<li>Knock-out 미발생 : 평가만기일 종가에 따라 풋옵션 내재가치를 지급받음</li>
+<li>각 payoff를 잔존만기(<span class="math inline">\(T_1\)</span>)에 대해 할인하여 npv를 산출</li>
+</ul></li>
+<li>이에 따라 산출된 npv를 산술평균을 통해 배리어옵션(ELB)의 공정가치를 산출</li>
+</ol>
+</section>
+<section id="알고리즘-구현-python-code" class="level3">
+<h3 class="anchored" data-anchor-id="알고리즘-구현-python-code">알고리즘 구현 (Python code)</h3>
+<p>알고리즘을 Python 코드로 구현하였으며, Down-out Put option 가격과 GBM을 활용한 기초자산의 경로를 반환하는 함수로 작성하였습니다.</p>
+<div id="75764ce9" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats <span class="im">as</span> sst</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> DownAndOutPut_Price(s, k, r, q, t, sigma, n, b, m, rebate):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Set parameters</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    dt <span class="op">=</span> t<span class="op">/</span>m</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    dts <span class="op">=</span> np.arange(dt, t<span class="op">+</span>dt, dt)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (1) Stratified sampling, z_t makes price at T &amp; z makes brownian bridge</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    z_t <span class="op">=</span> sst.norm.ppf((np.arange(n) <span class="op">+</span> np.random.uniform(<span class="dv">0</span>,<span class="dv">1</span>,n)) <span class="op">/</span> n)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> np.random.randn(n,m)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (2) Moment matching in z_t</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    z_t <span class="op">=</span> np.where(n<span class="op">&gt;=</span><span class="dv">100</span>, (z_t <span class="op">-</span> z_t.mean()) <span class="op">/</span> z_t.std(ddof<span class="op">=</span><span class="dv">1</span>), z_t <span class="op">-</span> z_t.mean())</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (3) Antithetic variate</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    z_t, z <span class="op">=</span> np.concatenate([z_t, <span class="op">-</span>z_t], axis<span class="op">=</span><span class="dv">0</span>), np.concatenate([z, <span class="op">-</span>z], axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generate underlying paths using brownian bridge</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    w_t, w <span class="op">=</span> z_t <span class="op">*</span> np.sqrt(t), z.cumsum(axis<span class="op">=</span><span class="dv">1</span>) <span class="op">*</span> np.sqrt(dt) <span class="co"># winner process</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    bridge <span class="op">=</span> dts <span class="op">*</span> ((w_t<span class="op">-</span> w[:,<span class="op">-</span><span class="dv">1</span>]).reshape(<span class="bu">len</span>(w),<span class="dv">1</span>) <span class="op">+</span> w <span class="op">/</span> dts) <span class="co"># brownian bridge</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    paths <span class="op">=</span> s<span class="op">*</span>np.exp((r<span class="op">-</span>q<span class="op">-</span><span class="fl">0.5</span><span class="op">*</span>sigma<span class="op">**</span><span class="dv">2</span>)<span class="op">*</span>dts <span class="op">+</span> sigma<span class="op">*</span>bridge) <span class="co"># underlying price path</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Determine whether barrier touch or not (exists payoff or not)</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    knock <span class="op">=</span> paths.<span class="bu">min</span>(axis<span class="op">=</span><span class="dv">1</span>) <span class="op">&lt;</span> b <span class="co"># knock-out = 1 else 0</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    barrier_flag <span class="op">=</span> <span class="op">~</span>knock</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Caculate options payoff</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    plain_npv <span class="op">=</span> np.maximum(k<span class="op">-</span>paths[:,<span class="op">-</span><span class="dv">1</span>], <span class="dv">0</span>) <span class="op">*</span> np.exp(<span class="op">-</span>r<span class="op">*</span>t)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    barrier_npv <span class="op">=</span> barrier_flag <span class="op">*</span> plain_npv <span class="op">+</span> knock <span class="op">*</span> rebate <span class="op">*</span> np.exp(<span class="op">-</span>r<span class="op">*</span>t)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    barrier_price <span class="op">=</span> barrier_npv.mean()</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> barrier_price, paths</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="평가-결과-및-비교numerix-pricer" class="level2">
+<h2 class="anchored" data-anchor-id="평가-결과-및-비교numerix-pricer">평가 결과 및 비교(Numerix Pricer)</h2>
+<section id="배리어옵션-가격-및-기초자산-경로" class="level3">
+<h3 class="anchored" data-anchor-id="배리어옵션-가격-및-기초자산-경로">배리어옵션 가격 및 기초자산 경로</h3>
+<p>상술한 2025-4-29일의 기준 파라미터를 이용하여 배리어옵션의 가격을 평가해보았습니다.</p>
+<p>가격은 명목금액 <strong>10,000원을 기준으로 약 365원이며, 수익률로 환산할 때 약 3.65%</strong>입니다.</p>
+<p>시뮬레이션 횟수는 10만번 기준으로, 난수에 따라 편차가 약 1~2원 존재하였습니다.</p>
+<div id="654db70f" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>s0 <span class="op">=</span> <span class="fl">5675.29</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>s1 <span class="op">=</span> <span class="fl">5560.83</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> s0</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fl">0.03</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>q <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> <span class="fl">0.8</span> <span class="op">*</span> s0</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>t1 <span class="op">=</span> exptime <span class="op">/</span> <span class="dv">365</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>t2 <span class="op">=</span> (exptime<span class="op">-</span><span class="dv">3</span>) <span class="op">/</span> <span class="dv">365</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">0.2</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">100000</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> <span class="bu">len</span>(timesteps)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>rebate <span class="op">=</span> <span class="fl">0.06</span> <span class="op">*</span> s0</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>notional <span class="op">=</span> <span class="dv">10000</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>nxprice <span class="op">=</span> <span class="fl">366.8977875</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>price, GBMpath <span class="op">=</span> DownAndOutPut_Price(s1, k, r, q, t2, sigma, n, b, m, rebate)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>price <span class="op">=</span> price <span class="op">*</span> np.exp(r<span class="op">*</span>(t2<span class="op">-</span>t1)) <span class="op">/</span> s0 <span class="op">*</span> notional</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(price)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>364.26567636897414</code></pre>
+</div>
+</div>
+<p>시뮬레이션에 이용된 기초자산의 경로를 시각화한 결과입니다.</p>
+<p>계층화, 표준화 등 분산감소기법이 잘 적용되어 <strong>만기시점의 Lognormal dist. 형태</strong>가 잘 나타난 것을 볼 수 있으며, 시뮬레이션 중 배리어가격 밑으로 하락한 경우가 발생한 <strong>Knock-out의 비율은 약 22.65%</strong>로 나타났습니다.</p>
+<div id="f0030ad2" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="장외파생_과제_files/figure-html/cell-5-output-1.png" width="1334" height="566" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="numerix-pricer와-비교" class="level3">
+<h3 class="anchored" data-anchor-id="numerix-pricer와-비교">Numerix Pricer와 비교</h3>
+<p>유사한 조건의 Numerix pricer를 이용한 배리어옵션 가격은 약 366.9원(3.67%)로 산출되었습니다.</p>
+<p><img src="image/numerix_pricer.png" class="img-fluid"></p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./사례_과제.html" class="pagination-link" aria-label="코스피200 변동성 조정 위클리 양매도 전략">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">코스피200 변동성 조정 위클리 양매도 전략</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./금융윤리1.html" class="pagination-link" aria-label="금융윤리와 사회책임">
+        <span class="nav-page-text">금융윤리와 사회책임</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># 장외파생상품 기초실무 과제 {.unnumbered}</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>20249132 김형환</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">## 평가 상품 개요</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>이번 과제에서 평가해볼 장외파생상품은 S&amp;P500 기반의 ELB입니다.</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>**Long put + 20% Knock-out** 형태로, 원금보장형 payoff를 가지고 있습니다.</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>세부 사항은 아래 사진과 같습니다.</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/elb1.png)</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/elb2.png)</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/elb3.png)</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>이는 **배리어옵션**의 한 종류로, 만기까지 한번이라도 배리어(20%) 밑으로 하락하는 경우가 존재하면 옵션 권리가 사라지고(**Down-and-Out**), 대신 6%의 rebate를 지급하는 구조입니다.</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="fu">## 평가</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="fu">### 평가 개요</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>평가는 몬테카를로 시뮬레이션을 이용할 계획이며, Numerix pricer와 동일한 2025-4-29일을 기준으로 pricing하도록 하겠습니다.</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>배리어옵션 평가를 위한 parameter는 아래와 같이 정리하였습니다.</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$S_0$ : S&amp;P500지수의 최초기준가격평가일('25.3.19) 종가 (5,675.29pt)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$S_1$ : S&amp;P500지수의 평가일('25.4.29) 종가 (5,560.83pt)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$K$ : Down-and-out put options 행사가격(=$S_0\times 100\%$)</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$B$ : Down-and-out put options 배리어가격(=$S_0\times 80\%$)</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$r$ : 무위험이자율(=3% 가정)</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$q$ : S&amp;P500 배당수익률(=0% 가정정)</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\sigma$ : 기초자산 변동성(=20% 가정)</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$T_1$ : 잔존만기(=324/365)</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$T_2$ : 배리어옵션 평가대상만기(=321/365)</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$n$ : 몬테카를로 시뮬레이션 시행횟수</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$m$ : 시뮬레이션 경로 분할 갯수(거래일별, 220)</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$rebate$ : 배리어옵션 Knock-out 시 지급하는 쿠폰(=6%)</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="파라미터 결정 근거"}</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>상품 평가를 위한 파라미터의 산정 근거는 아래와 같습니다.</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="in">    - 기초자산가격, 행사가격, 배리어가격, 만기 등 : 상품 개요에서 확인</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="in">    - 무위험이자율 : 미국에서는 SOFR, USD-libor, FFR 등이 널리 사용되며, Swap rate 등을 활용해 term-structure를 구성하는 것이 가장 정밀한 방법입니다. 분석의 단순화를 위해 **3%를 가정**하였습니다.</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a><span class="in">    - S&amp;P500 배당수익률 : 과거 배당이 유지된다고 가정하거나, 별도의 모델링을 통해 기간구조를 구성하는 것이 가장 정밀한 방법입니다. 분석의 단순화를 위해 **배당이 없다고 가정**하였습니다.</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="in">    - 평가대상만기 : 명목 만기는 1년이나, 만기평가일에 옵션 payoff가 결정되므로, 3거래일을 차감한 값을 활용하였습니다.</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="in">    - 기초자산 변동성 : 시장가격을 활용한 내재변동성을 이용하였으며, Local Vol 등을 통해 Surface를 구성하여 시뮬레이션 하는 것이 가장 정밀한 방법입니다. 다만, 분석의 단순화를 위해 **20%를 가정**하였습니다.</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="in">    - 경로 분할 갯수 : Lookback period의 간격이 1일이므로 거래일수로 분할하였습니다.</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>거래일은 NYSE를 기준으로 산출하였고, 데이터는 <span class="in">`yahoo finance`</span>, <span class="in">`cme`</span>, <span class="in">`cboe`</span>를 참고하였습니다.</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas_market_calendars <span class="im">as</span> mcal</span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> date</span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>exp <span class="op">=</span> date(<span class="dv">2026</span>, <span class="dv">3</span>, <span class="dv">19</span>)</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>strt <span class="op">=</span> date(<span class="dv">2025</span>, <span class="dv">4</span>, <span class="dv">29</span>)</span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>exptime <span class="op">=</span> (exp <span class="op">-</span> strt).days</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>strt <span class="op">=</span> <span class="st">'2025-04-30'</span><span class="op">;</span> end<span class="op">=</span><span class="st">'2026-03-16'</span><span class="op">;</span></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>nyse <span class="op">=</span> mcal.get_calendar(<span class="st">'NYSE'</span>)</span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>timesteps <span class="op">=</span> nyse.valid_days(start_date<span class="op">=</span>strt, end_date<span class="op">=</span>end)</span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(exptime, <span class="bu">len</span>(timesteps))</span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a><span class="fu">### 평가 알고리즘</span></span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a>기초자산인 **S&amp;P500 지수가 GBM을 따른다는 가정** 하에 정규난수를 이용하여 만기평가일까지의 주가흐름을 시뮬레이션할 계획이며, 알고리즘은 아래와 같습니다.</span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a>(1) 현재 주가($S_0$)와 만기($T_2$), 변동성($\sigma$), 기대수익률($\mu=r-d$)를 통해 GBM을 구성하고, Euler's discretization을 통해 248거래일마다 종가를 생성</span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>먼저, 평가대상만기일의 종가를 n개 생성(Stratified sampling, Moment matching, Antithetic variate를 활용하여 균질한 분포를 구현)</span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>각 n개의 종가마다, 그 경로의 247(총 (m-1)*n)개의 난수를 생성(Antithetic variate 적용)하고, brownian bridge 방법을 통해 오일러 이산화를 구현</span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a>(2) 각 경로마다 Knock 여부와 내재가치를 고려하여 배리어옵션의 payoff와 npv를 결정</span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>Knock-out 발생 : 명목금액의 6%의 rebate를 지급받음</span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>Knock-out 미발생 : 평가만기일 종가에 따라 풋옵션 내재가치를 지급받음</span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>각 payoff를 잔존만기($T_1$)에 대해 할인하여 npv를 산출</span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a>(3) 이에 따라 산출된 npv를 산술평균을 통해 배리어옵션(ELB)의 공정가치를 산출 </span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a><span class="fu">### 알고리즘 구현 (Python code)</span></span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a>알고리즘을 Python 코드로 구현하였으며, Down-out Put option 가격과 GBM을 활용한 기초자산의 경로를 반환하는 함수로 작성하였습니다.</span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats <span class="im">as</span> sst</span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> DownAndOutPut_Price(s, k, r, q, t, sigma, n, b, m, rebate):</span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Set parameters</span></span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a>    dt <span class="op">=</span> t<span class="op">/</span>m</span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a>    dts <span class="op">=</span> np.arange(dt, t<span class="op">+</span>dt, dt)</span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (1) Stratified sampling, z_t makes price at T &amp; z makes brownian bridge</span></span>
+<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a>    z_t <span class="op">=</span> sst.norm.ppf((np.arange(n) <span class="op">+</span> np.random.uniform(<span class="dv">0</span>,<span class="dv">1</span>,n)) <span class="op">/</span> n)</span>
+<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> np.random.randn(n,m)</span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (2) Moment matching in z_t</span></span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a>    z_t <span class="op">=</span> np.where(n<span class="op">&gt;=</span><span class="dv">100</span>, (z_t <span class="op">-</span> z_t.mean()) <span class="op">/</span> z_t.std(ddof<span class="op">=</span><span class="dv">1</span>), z_t <span class="op">-</span> z_t.mean())</span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (3) Antithetic variate</span></span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a>    z_t, z <span class="op">=</span> np.concatenate([z_t, <span class="op">-</span>z_t], axis<span class="op">=</span><span class="dv">0</span>), np.concatenate([z, <span class="op">-</span>z], axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generate underlying paths using brownian bridge</span></span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a>    w_t, w <span class="op">=</span> z_t <span class="op">*</span> np.sqrt(t), z.cumsum(axis<span class="op">=</span><span class="dv">1</span>) <span class="op">*</span> np.sqrt(dt) <span class="co"># winner process</span></span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a>    bridge <span class="op">=</span> dts <span class="op">*</span> ((w_t<span class="op">-</span> w[:,<span class="op">-</span><span class="dv">1</span>]).reshape(<span class="bu">len</span>(w),<span class="dv">1</span>) <span class="op">+</span> w <span class="op">/</span> dts) <span class="co"># brownian bridge</span></span>
+<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a>    paths <span class="op">=</span> s<span class="op">*</span>np.exp((r<span class="op">-</span>q<span class="op">-</span><span class="fl">0.5</span><span class="op">*</span>sigma<span class="op">**</span><span class="dv">2</span>)<span class="op">*</span>dts <span class="op">+</span> sigma<span class="op">*</span>bridge) <span class="co"># underlying price path</span></span>
+<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Determine whether barrier touch or not (exists payoff or not)</span></span>
+<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a>    knock <span class="op">=</span> paths.<span class="bu">min</span>(axis<span class="op">=</span><span class="dv">1</span>) <span class="op">&lt;</span> b <span class="co"># knock-out = 1 else 0</span></span>
+<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a>    barrier_flag <span class="op">=</span> <span class="op">~</span>knock</span>
+<span id="cb7-120"><a href="#cb7-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-121"><a href="#cb7-121" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Caculate options payoff</span></span>
+<span id="cb7-122"><a href="#cb7-122" aria-hidden="true" tabindex="-1"></a>    plain_npv <span class="op">=</span> np.maximum(k<span class="op">-</span>paths[:,<span class="op">-</span><span class="dv">1</span>], <span class="dv">0</span>) <span class="op">*</span> np.exp(<span class="op">-</span>r<span class="op">*</span>t)</span>
+<span id="cb7-123"><a href="#cb7-123" aria-hidden="true" tabindex="-1"></a>    barrier_npv <span class="op">=</span> barrier_flag <span class="op">*</span> plain_npv <span class="op">+</span> knock <span class="op">*</span> rebate <span class="op">*</span> np.exp(<span class="op">-</span>r<span class="op">*</span>t)</span>
+<span id="cb7-124"><a href="#cb7-124" aria-hidden="true" tabindex="-1"></a>    barrier_price <span class="op">=</span> barrier_npv.mean()</span>
+<span id="cb7-125"><a href="#cb7-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-126"><a href="#cb7-126" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> barrier_price, paths</span>
+<span id="cb7-127"><a href="#cb7-127" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-128"><a href="#cb7-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-129"><a href="#cb7-129" aria-hidden="true" tabindex="-1"></a><span class="fu">## 평가 결과 및 비교(Numerix Pricer)</span></span>
+<span id="cb7-130"><a href="#cb7-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-131"><a href="#cb7-131" aria-hidden="true" tabindex="-1"></a><span class="fu">### 배리어옵션 가격 및 기초자산 경로</span></span>
+<span id="cb7-132"><a href="#cb7-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-133"><a href="#cb7-133" aria-hidden="true" tabindex="-1"></a>상술한 2025-4-29일의 기준 파라미터를 이용하여 배리어옵션의 가격을 평가해보았습니다.</span>
+<span id="cb7-134"><a href="#cb7-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-135"><a href="#cb7-135" aria-hidden="true" tabindex="-1"></a>가격은 명목금액 **10,000원을 기준으로 약 365원이며, 수익률로 환산할 때 약 3.65%**입니다.</span>
+<span id="cb7-136"><a href="#cb7-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-137"><a href="#cb7-137" aria-hidden="true" tabindex="-1"></a>시뮬레이션 횟수는 10만번 기준으로, 난수에 따라 편차가 약 1~2원 존재하였습니다.</span>
+<span id="cb7-138"><a href="#cb7-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-141"><a href="#cb7-141" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb7-142"><a href="#cb7-142" aria-hidden="true" tabindex="-1"></a>s0 <span class="op">=</span> <span class="fl">5675.29</span></span>
+<span id="cb7-143"><a href="#cb7-143" aria-hidden="true" tabindex="-1"></a>s1 <span class="op">=</span> <span class="fl">5560.83</span></span>
+<span id="cb7-144"><a href="#cb7-144" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> s0</span>
+<span id="cb7-145"><a href="#cb7-145" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fl">0.03</span></span>
+<span id="cb7-146"><a href="#cb7-146" aria-hidden="true" tabindex="-1"></a>q <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb7-147"><a href="#cb7-147" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> <span class="fl">0.8</span> <span class="op">*</span> s0</span>
+<span id="cb7-148"><a href="#cb7-148" aria-hidden="true" tabindex="-1"></a>t1 <span class="op">=</span> exptime <span class="op">/</span> <span class="dv">365</span></span>
+<span id="cb7-149"><a href="#cb7-149" aria-hidden="true" tabindex="-1"></a>t2 <span class="op">=</span> (exptime<span class="op">-</span><span class="dv">3</span>) <span class="op">/</span> <span class="dv">365</span></span>
+<span id="cb7-150"><a href="#cb7-150" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">0.2</span></span>
+<span id="cb7-151"><a href="#cb7-151" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">100000</span></span>
+<span id="cb7-152"><a href="#cb7-152" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> <span class="bu">len</span>(timesteps)</span>
+<span id="cb7-153"><a href="#cb7-153" aria-hidden="true" tabindex="-1"></a>rebate <span class="op">=</span> <span class="fl">0.06</span> <span class="op">*</span> s0</span>
+<span id="cb7-154"><a href="#cb7-154" aria-hidden="true" tabindex="-1"></a>notional <span class="op">=</span> <span class="dv">10000</span></span>
+<span id="cb7-155"><a href="#cb7-155" aria-hidden="true" tabindex="-1"></a>nxprice <span class="op">=</span> <span class="fl">366.8977875</span></span>
+<span id="cb7-156"><a href="#cb7-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-157"><a href="#cb7-157" aria-hidden="true" tabindex="-1"></a>price, GBMpath <span class="op">=</span> DownAndOutPut_Price(s1, k, r, q, t2, sigma, n, b, m, rebate)</span>
+<span id="cb7-158"><a href="#cb7-158" aria-hidden="true" tabindex="-1"></a>price <span class="op">=</span> price <span class="op">*</span> np.exp(r<span class="op">*</span>(t2<span class="op">-</span>t1)) <span class="op">/</span> s0 <span class="op">*</span> notional</span>
+<span id="cb7-159"><a href="#cb7-159" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(price)</span>
+<span id="cb7-160"><a href="#cb7-160" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-161"><a href="#cb7-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-162"><a href="#cb7-162" aria-hidden="true" tabindex="-1"></a>시뮬레이션에 이용된 기초자산의 경로를 시각화한 결과입니다.</span>
+<span id="cb7-163"><a href="#cb7-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-164"><a href="#cb7-164" aria-hidden="true" tabindex="-1"></a>계층화, 표준화 등 분산감소기법이 잘 적용되어 **만기시점의 Lognormal dist. 형태**가 잘 나타난 것을 볼 수 있으며, 시뮬레이션 중 배리어가격 밑으로 하락한 경우가 발생한 **Knock-out의 비율은 약 22.65%**로 나타났습니다.</span>
+<span id="cb7-165"><a href="#cb7-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-168"><a href="#cb7-168" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb7-169"><a href="#cb7-169" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb7-170"><a href="#cb7-170" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb7-171"><a href="#cb7-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-172"><a href="#cb7-172" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-173"><a href="#cb7-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-174"><a href="#cb7-174" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb7-175"><a href="#cb7-175" aria-hidden="true" tabindex="-1"></a>idx_sample <span class="op">=</span> np.random.choice(GBMpath.shape[<span class="dv">0</span>], size<span class="op">=</span><span class="dv">100</span>, replace<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb7-176"><a href="#cb7-176" aria-hidden="true" tabindex="-1"></a>GBM_sample <span class="op">=</span> GBMpath[idx_sample]</span>
+<span id="cb7-177"><a href="#cb7-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-178"><a href="#cb7-178" aria-hidden="true" tabindex="-1"></a>KO_mask_all <span class="op">=</span> (GBMpath <span class="op">&lt;</span> b).<span class="bu">any</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-179"><a href="#cb7-179" aria-hidden="true" tabindex="-1"></a>KOratio <span class="op">=</span> KO_mask_all.mean()</span>
+<span id="cb7-180"><a href="#cb7-180" aria-hidden="true" tabindex="-1"></a>sample_KO_mask <span class="op">=</span> (GBM_sample <span class="op">&lt;</span> b).<span class="bu">any</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-181"><a href="#cb7-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-182"><a href="#cb7-182" aria-hidden="true" tabindex="-1"></a><span class="co"># 시각화</span></span>
+<span id="cb7-183"><a href="#cb7-183" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">6</span>))</span>
+<span id="cb7-184"><a href="#cb7-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-185"><a href="#cb7-185" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, path <span class="kw">in</span> <span class="bu">enumerate</span>(GBM_sample):</span>
+<span id="cb7-186"><a href="#cb7-186" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> sample_KO_mask[i]: axs[<span class="dv">0</span>].plot(path, color<span class="op">=</span><span class="st">'black'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb7-187"><a href="#cb7-187" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>: axs[<span class="dv">0</span>].plot(path, alpha<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="cb7-188"><a href="#cb7-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-189"><a href="#cb7-189" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].axhline(b, color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="ss">f'Barrier b=</span><span class="sc">{</span>b<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb7-190"><a href="#cb7-190" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].legend(loc<span class="op">=</span><span class="st">'upper right'</span>)</span>
+<span id="cb7-191"><a href="#cb7-191" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].set_title(<span class="st">'Underlying paths generated from GBM (100 samples)'</span>)</span>
+<span id="cb7-192"><a href="#cb7-192" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].set_xlabel(<span class="st">'Time step (daily)'</span>)</span>
+<span id="cb7-193"><a href="#cb7-193" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].set_ylabel(<span class="st">'Underlying price'</span>)</span>
+<span id="cb7-194"><a href="#cb7-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-195"><a href="#cb7-195" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].text(</span>
+<span id="cb7-196"><a href="#cb7-196" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>m <span class="op">*</span> <span class="fl">0.33</span>, y<span class="op">=</span>b <span class="op">*</span> <span class="fl">0.90</span>,</span>
+<span id="cb7-197"><a href="#cb7-197" aria-hidden="true" tabindex="-1"></a>    s<span class="op">=</span><span class="ss">f'Knock-out Ratio: </span><span class="sc">{</span>KOratio<span class="sc">:.2%}</span><span class="ss">'</span>,</span>
+<span id="cb7-198"><a href="#cb7-198" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">'black'</span>, fontsize<span class="op">=</span><span class="dv">12</span>, ha<span class="op">=</span><span class="st">'right'</span></span>
+<span id="cb7-199"><a href="#cb7-199" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-200"><a href="#cb7-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-201"><a href="#cb7-201" aria-hidden="true" tabindex="-1"></a>final_prices <span class="op">=</span> GBMpath[:, <span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb7-202"><a href="#cb7-202" aria-hidden="true" tabindex="-1"></a>n_bins <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb7-203"><a href="#cb7-203" aria-hidden="true" tabindex="-1"></a>counts, bins <span class="op">=</span> np.histogram(final_prices, bins<span class="op">=</span>n_bins)</span>
+<span id="cb7-204"><a href="#cb7-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-205"><a href="#cb7-205" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].barh(</span>
+<span id="cb7-206"><a href="#cb7-206" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>(bins[:<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> bins[<span class="dv">1</span>:]) <span class="op">/</span> <span class="dv">2</span>,</span>
+<span id="cb7-207"><a href="#cb7-207" aria-hidden="true" tabindex="-1"></a>    width<span class="op">=</span>counts, height<span class="op">=</span>(bins[<span class="dv">1</span>] <span class="op">-</span> bins[<span class="dv">0</span>]) <span class="op">*</span> <span class="fl">0.9</span>,</span>
+<span id="cb7-208"><a href="#cb7-208" aria-hidden="true" tabindex="-1"></a>    align<span class="op">=</span><span class="st">'center'</span>, color<span class="op">=</span><span class="st">'skyblue'</span>, edgecolor<span class="op">=</span><span class="st">'black'</span></span>
+<span id="cb7-209"><a href="#cb7-209" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-210"><a href="#cb7-210" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].set_title(<span class="st">'Distribution at expiration (Total simulation)'</span>)</span>
+<span id="cb7-211"><a href="#cb7-211" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].set_xlabel(<span class="st">'Number of sample'</span>)</span>
+<span id="cb7-212"><a href="#cb7-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-213"><a href="#cb7-213" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-214"><a href="#cb7-214" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb7-215"><a href="#cb7-215" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb7-216"><a href="#cb7-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-217"><a href="#cb7-217" aria-hidden="true" tabindex="-1"></a><span class="fu">### Numerix Pricer와 비교</span></span>
+<span id="cb7-218"><a href="#cb7-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-219"><a href="#cb7-219" aria-hidden="true" tabindex="-1"></a>유사한 조건의 Numerix pricer를 이용한 배리어옵션 가격은 약 366.9원(3.67%)로 산출되었습니다.</span>
+<span id="cb7-220"><a href="#cb7-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-221"><a href="#cb7-221" aria-hidden="true" tabindex="-1"></a><span class="al">![](image/numerix_pricer.png)</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
