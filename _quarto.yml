@@ -35,7 +35,7 @@ book:
 
     - part : 장외파생상품 기초 실무('25 봄)
       chapters: 
-       - 장외파생1.qmd
+       - 장외파생_과제.qmd
 
     - part : 금융윤리와 사회책임('25 봄)
       chapters: 
